@@ -1,0 +1,191 @@
+import React from 'react'
+import styled, { css } from 'styled-components'
+  
+const scale = 3
+const rows = 8
+const cols = 8
+const spacing = 3
+
+export default class TileSetSelector extends React.Component {
+  
+  state = {
+  }
+  
+  constructor (props) {
+    super(props)
+    
+    for (let k = 0; k < rows * cols; k++) {
+      if (!props.tiles[k]) {
+        const blank = []
+        for (let f = 0; f < 64; f++) {
+          blank.push(0)
+        }
+        props.tiles[k] = blank
+      }
+    }
+  }
+  
+  setCanvas (el) {
+    this.canvas = el
+    if (el) {
+      this.redraw()
+    }
+  }
+  
+  redraw () {
+    if (!this.canvas) return
+    this.canvas.width = cols * 8 * scale + (cols + 1) * spacing
+    this.canvas.height = rows * 8 * scale + (rows + 1) * spacing
+    const ctx = this.canvas.getContext('2d')
+    
+    ctx.fillStyle = '#2044ff'
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    
+    let index = 0
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = spacing + col * (scale * 8 + spacing)
+        const y = spacing + row * (scale * 8 + spacing)
+        
+        // Draw hovering
+        let outlineColor
+        if (this.props.selectedTile === index) {
+          outlineColor = 'rgb(255, 222, 0)'
+        } else if (this.state.hovering === index || this.props.highlightTile === index) {
+          outlineColor = 'rgb(0, 255, 217)'
+        }
+        if (outlineColor) {
+          ctx.fillStyle = outlineColor
+          ctx.fillRect(x - spacing, y - spacing, scale * 8 + spacing * 2, scale * 8 + spacing * 2)
+        }
+        
+        // Draw empty cell
+        ctx.fillStyle = '#000000'
+        ctx.fillRect(x, y, scale * 8, scale * 8)
+        
+        // Draw individual pixels
+        ctx.fillStyle = '#ffffff'
+        const data = this.props.tiles[index]
+        if (data) {
+          let pixelIndex = 0
+          for (let py = 0; py < 8; py++) {
+            for (let px = 0; px < 8; px++) {
+              if (data[pixelIndex] === 1) {
+                ctx.fillRect(x + px * scale, y + py * scale, scale, scale)
+              }
+              pixelIndex++
+            }
+          }
+        }
+        
+        index++
+      }
+    }
+  }
+  
+  getTileFromEvent (e) {
+    const bounds = e.target.getBoundingClientRect()
+    if (e.clientX < bounds.left || e.clientX > bounds.left + bounds.width || e.clientY < bounds.top || e.clientY > bounds.top + bounds.height) return -1
+    const localX = e.clientX - bounds.left
+    const localY = e.clientY - bounds.top
+    const col = Math.floor((localX - spacing) / (scale * 8 + spacing))
+    const row = Math.floor((localY - spacing) / (scale * 8 + spacing))
+    return row * cols + col
+  }
+  
+  hovering (e) {
+    if (e) {
+      const index = this.getTileFromEvent(e)
+      if (this.state.hovering !== index) {
+        this.setState({
+          hovering: index
+        })
+      }
+    } else {
+      this.setState({
+        hovering: null
+      })
+    }
+  }
+  
+  selecting (e) {
+    const index = this.getTileFromEvent(e)
+    this.setState({
+      selected: index
+    })
+    if (this.props.onSelect) {
+      this.props.onSelect(index)
+    }
+  }
+  
+  getInfoText (index) {
+    if (index === -1) return 'N/A'
+    return `#${index} (${index - Math.floor(index / cols) * rows}, ${Math.floor(index / rows)})`
+  }
+  
+  startDrag (e) {
+    const index = this.getTileFromEvent(e)
+    this.dragging = true
+    this.draggingTile = index
+    this.redraw()
+  }
+  
+  cancelDrag (e) {
+    this.dragging = false
+    this.redraw()
+  }
+  
+  endDrag (e) {
+    if (this.dragging) {
+      const index = this.getTileFromEvent(e)
+      this.copyTileData(this.draggingTile, index)
+      this.dragging = false
+      this.draggingTile = undefined
+      this.redraw()
+    }
+  }
+  
+  copyTileData (from, to) {
+    this.props.tiles[to] = JSON.parse(JSON.stringify(this.props.tiles[from]))
+  }
+  
+  render () {
+    
+    let info = ':)'
+    if (typeof this.state.hovering === 'number') {
+      info = 'HOV: ' + this.getInfoText(this.state.hovering)
+    } else if (typeof this.state.selected === 'number') {
+      info = 'SEL: ' + this.getInfoText(this.state.selected)
+    }
+    
+    return (
+      <Wrapper>
+        <InfoBar>{info}</InfoBar>
+        <canvas
+          ref={el => this.setCanvas(el)}
+          onMouseDown={e => this.startDrag(e)}
+          onMouseMove={e => this.hovering(e)}
+          onMouseLeave={e => {
+            this.hovering(null)
+            this.cancelDrag(e)
+          }}
+          onMouseUp={e => {
+            this.endDrag(e)
+          }}
+          onClick={e => this.selecting(e)}
+        />
+      </Wrapper>
+    )
+    
+  }
+  
+}
+
+const Wrapper = styled.div`
+  padding: 10px;
+`
+
+const InfoBar = styled.div`
+  color: #666666;
+  padding-bottom: 5px;
+`
