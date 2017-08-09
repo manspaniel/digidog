@@ -129,6 +129,7 @@ export default class App extends Component {
         <Section auto>
           <Heading>Tiles</Heading>
           <TileSetSelector
+            sprites={this.props.data.sprites}
             tiles={this.props.data.tiles}
             highlightTile={this.state.highlightTile}
             selectedTile={this.state.selectedTile}

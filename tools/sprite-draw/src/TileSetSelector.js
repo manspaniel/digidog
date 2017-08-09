@@ -8,8 +8,7 @@ const spacing = 3
 
 export default class TileSetSelector extends React.Component {
   
-  state = {
-  }
+  state = {}
   
   constructor (props) {
     super(props)
@@ -137,8 +136,15 @@ export default class TileSetSelector extends React.Component {
   
   endDrag (e) {
     if (this.dragging) {
+      // If you hold shift/cmd/ctrl, it'll swap rather than duplicate
       const index = this.getTileFromEvent(e)
-      this.copyTileData(this.draggingTile, index)
+      if (e.ctrlKey || e.shiftKey || e.metaKey) {
+        // Move
+        this.swapTileData(this.draggingTile, index)
+      } else {
+        // Copy
+        this.copyTileData(this.draggingTile, index)
+      }
       this.dragging = false
       this.draggingTile = undefined
       this.redraw()
@@ -147,6 +153,28 @@ export default class TileSetSelector extends React.Component {
   
   copyTileData (from, to) {
     this.props.tiles[to] = JSON.parse(JSON.stringify(this.props.tiles[from]))
+  }
+  
+  swapTileData (fromIndex, toIndex) {
+    const from = this.props.tiles[fromIndex]
+    const to = this.props.tiles[toIndex]
+    
+    this.props.tiles[fromIndex] = to
+    this.props.tiles[toIndex] = from
+    
+    for (let spriteName in this.props.sprites) {
+      const sprite = this.props.sprites[spriteName]
+      for (let k in sprite.data) {
+        const item = sprite.data[k]
+        if (item) {
+          if (item[0] === fromIndex) {
+            item[0] = toIndex
+          } else if(item[0] === toIndex) {
+            item[0] = fromIndex
+          }
+        }
+      }
+    }
   }
   
   render () {
@@ -163,13 +191,20 @@ export default class TileSetSelector extends React.Component {
         <InfoBar>{info}</InfoBar>
         <canvas
           ref={el => this.setCanvas(el)}
-          onMouseDown={e => this.startDrag(e)}
-          onMouseMove={e => this.hovering(e)}
+          onMouseDown={e => {
+            e.preventDefault()
+            this.startDrag(e)
+          }}
+          onMouseMove={e => {
+            e.preventDefault()
+            this.hovering(e)
+          }}
           onMouseLeave={e => {
             this.hovering(null)
             this.cancelDrag(e)
           }}
           onMouseUp={e => {
+            e.preventDefault()
             this.endDrag(e)
           }}
           onClick={e => this.selecting(e)}

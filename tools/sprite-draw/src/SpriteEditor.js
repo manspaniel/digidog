@@ -98,7 +98,7 @@ export default class SpriteEditor extends React.Component {
     
     this.state = {
       tool: initialTool,
-      scale: scaleSetting === 'auto' ? 'auto' : parseInt(scaleSetting),
+      scale: parseInt(scaleSetting) || 'auto',
       grid: gridSetting === 'false' ? false : true
     }
   }
