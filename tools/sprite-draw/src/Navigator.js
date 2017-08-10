@@ -54,6 +54,32 @@ export default class Navigator extends React.Component {
       }
     }
     window.addEventListener('click', this.handleWindowClick)
+    
+    this.handleKeyDown = (e) => {
+      if (e.key === 'ArrowUp') {
+        this.cycleSelection(-1)
+        e.preventDefault()
+      } else if(e.key === 'ArrowDown') {
+        this.cycleSelection(1)
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('keydown', this.handleKeyDown)
+  }
+  
+  componentWillUnmount () {
+    window.removeEventListener('click', this.handleWindowClick)
+    window.removeEventListener('keydown', this.handleKeyDown)
+  }
+  
+  cycleSelection (dir) {
+    if (!this.props.selected) return
+    const names = Object.keys(this.props.sprites).sort()
+    let index = names.indexOf(this.props.selected)
+    if (index === -1) return
+    index += dir
+    if (index < 0 || index > names.length - 1) return
+    this.selectItem(names[index])
   }
   
   showContextMenu (spriteName) {

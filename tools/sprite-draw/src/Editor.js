@@ -76,6 +76,15 @@ export default class App extends Component {
     })
   }
   
+  componentDidUpdate (oldProps, newProps) {
+    if (oldProps.data !== this.props.data) {
+      // Got new data
+      this.setState({
+        sprite: null
+      })
+    }
+  }
+  
   render () {
     return (
       <EditorWrapper>
@@ -122,6 +131,9 @@ export default class App extends Component {
                     selectedTile: tileIndex
                   })
                 }}
+                onTileSetChange={e => {
+                  this.forceUpdate()
+                }}
               />
             : <PickASprite>Pick a sprite</PickASprite>
           }
@@ -129,6 +141,8 @@ export default class App extends Component {
         <Section auto>
           <Heading>Tiles</Heading>
           <TileSetSelector
+            totalTilesets={this.props.totalTilesets}
+            tileset={(this.state.sprite && this.state.sprite.tileset) || 0}
             sprites={this.props.data.sprites}
             tiles={this.props.data.tiles}
             highlightTile={this.state.highlightTile}

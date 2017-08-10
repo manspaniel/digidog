@@ -1,66 +1,60 @@
->## A Big Update Is Coming
+Dog Editor
+==========
 
->React Hot Loader 3 is [on the horizon](https://github.com/gaearon/react-hot-loader/pull/240), and you can try it today ([boilerplate branch](https://github.com/gaearon/react-hot-boilerplate/pull/61), [upgrade example](https://github.com/gaearon/redux-devtools/commit/64f58b7010a1b2a71ad16716eb37ac1031f93915)). It fixes some [long-standing issues](https://twitter.com/dan_abramov/status/722040946075045888) with both React Hot Loader and React Transform, and is intended as a replacement for both. The docs are not there yet, but they will be added before the final release. For now, [this commit](https://github.com/gaearon/redux-devtools/commit/64f58b7010a1b2a71ad16716eb37ac1031f93915) is a good reference.
+A quick and hacky tile-based bitmap editor, specifically built for the purpose
+of creating virtual pet dog sprites and related imagery.
 
+## Running the tool
 
-React Hot Boilerplate
-=====================
+You'll need Node JS 8 or higher installed for this tool to work.
 
-The minimal dev environment to enable live-editing React components.
+After you've cloned the project repository, cd into the dog editor folder, and start her up!
 
-### ⚠️⚠️⚠️ This Is Experimental and Incomplete! ⚠️⚠️⚠️
-
-This is **not a good starting point for people learning React.**  
-It’s experimental and completely lacks any production features.
-
-**Do not use this as an actual project boilerplate!**  
-If you’re just getting started with React, **use [Create React App](https://github.com/facebookincubator/create-react-app) instead.**
-
-### Usage
-
-```
-git clone https://github.com/gaearon/react-hot-boilerplate.git
-cd react-hot-boilerplate/
-npm install
-npm start
-open http://localhost:3000
+```bash
+> cd tools/dog-editor
+> npm install
+> npm start
 ```
 
-Now edit `src/App.js`.  
-Your changes will appear without reloading the browser like in [this video](http://vimeo.com/100010922).
+## Tile system
 
-### Linting
+The system uses a tile system.
 
-This boilerplate project includes React-friendly ESLint configuration.
+A **tileset** is a group of 64 tiles. Tilesets are all stored together, however they are paged in chunks of 64 to reduce the size of the sprites themselves, while expanding the amount of tiles that can be used by the program.
 
+A **tiles** is an 8x8 monochrome bitmap. Each column (or row) can be represented in 1 byte (8 bits), since there are only two possible values for each pixel — black or white. This means each tile takes up 8 bytes in total.
+
+A **sprite** (probably poorly named) has a variable width and height, and is composed entirely of tiles. A sprite must also reference a single **tileset**, which means that no sprite can use tiles from two different tilesets.
+
+Tilesets are in groups of 64, because it means that each tile within a sprite can be referenced with only one byte. Two bits of each sprite tile each is reserved for flipX and flipY, and the remaining 6 bits can be used to reference a tile. The tileset number attached to the sprite just provides the pagination value.
+
+## Loading and Saving
+
+Hit the "Save" button to persist your tiles and sprites to disk.
+
+Hit the "Reload" button to reload the persisted data.
+
+Hit the "Publish Headers" button to generate and publish the `tiles.h` file to the parent project (ie. `../../src/tiles.h`).
+
+## Persisting to a different file
+
+All data is persisted in a JSON file, which by default is `data.json` within the dog-editor project folder. When booting the server app, you can actually specify another file using:
+
+```bash
+> npm start -- doggytest.json
 ```
-npm run lint
-```
 
-### Using `0.0.0.0` as Host
+## Tips and Functions
 
-You may want to change the host in `server.js` and `webpack.config.js` from `localhost` to `0.0.0.0` to allow access from same WiFi network. This is not enabled by default because it is reported to cause problems on Windows. This may also be useful if you're using a VM.
+In the "Tiles" section:
 
-### Missing Features
+* Drag with the mouse from one tile to another to copy sprite data!
+* Do the same while holding SHIFT to *swap* those tiles. Sprites using either of those tiles will also be updated to point to the swapped tile, so your tiles wont break. This is really useful for organising your tileset.
+* Clicking on a tile will highlight in green any sprite which uses that tile. This is good for determining if a tile is actually in use by any sprite.
 
-This boilerplate is purposefully simple to show the minimal configuration for React Hot Loader. For a real project, you'll want to add a separate config for production with hot reloading disabled and minification enabled. You'll also want to add a router, styles and maybe combine dev server with an existing server. This is out of scope of this boilerplate, but you may want to look into [other starter kits](https://github.com/gaearon/react-hot-loader/blob/master/docs/README.md#starter-kits).
+In the sprite editor:
 
-### WebStorm
-
-Because the WebStorm IDE uses "safe writes" by default, Webpack's file-watcher won't recognize file changes, so hot-loading won't work. To fix this, disable "safe write" in WebStorm.
-
-### Dependencies
-
-* React
-* Webpack
-* [webpack-dev-server](https://github.com/webpack/webpack-dev-server)
-* [babel-loader](https://github.com/babel/babel-loader)
-* [react-hot-loader](https://github.com/gaearon/react-hot-loader)
-
-### Resources
-
-* [Demo video](http://vimeo.com/100010922)
-* [react-hot-loader on Github](https://github.com/gaearon/react-hot-loader)
-* [Integrating JSX live reload into your workflow](http://gaearon.github.io/react-hot-loader/getstarted/)
-* [Troubleshooting guide](https://github.com/gaearon/react-hot-loader/blob/master/docs/Troubleshooting.md)
-* Ping [@dan_abramov](https://twitter.com/dan_abramov) on Twitter or #reactjs (`chat.freenode.net/reactjs`) on IRC
+* Tools are represented by letters. You can press that letter on your keyboard to activate the tool!
+* Some tools do something different when you right click.
+  * The pencil tool (P) draws white by default, and erases to black with right mouse button.
+  * The tile tool (T) draws the selected tile, but if you right click on a tile in your active sprite it acts as an eye dropper!

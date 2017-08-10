@@ -13,7 +13,7 @@ export default class TileSetSelector extends React.Component {
   constructor (props) {
     super(props)
     
-    for (let k = 0; k < rows * cols; k++) {
+    for (let k = 0; k < rows * cols * props.totalTilesets; k++) {
       if (!props.tiles[k]) {
         const blank = []
         for (let f = 0; f < 64; f++) {
@@ -41,6 +41,7 @@ export default class TileSetSelector extends React.Component {
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     
     let index = 0
+    console.log('Starting at index', index)
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
         const x = spacing + col * (scale * 8 + spacing)
@@ -48,9 +49,9 @@ export default class TileSetSelector extends React.Component {
         
         // Draw hovering
         let outlineColor
-        if (this.props.selectedTile === index) {
+        if (this.props.selectedTile % 64 === index) {
           outlineColor = 'rgb(255, 222, 0)'
-        } else if (this.state.hovering === index || this.props.highlightTile === index) {
+        } else if (this.state.hovering % 64 === index || this.props.highlightTile % 64 === index) {
           outlineColor = 'rgb(0, 255, 217)'
         }
         if (outlineColor) {
@@ -64,7 +65,7 @@ export default class TileSetSelector extends React.Component {
         
         // Draw individual pixels
         ctx.fillStyle = '#ffffff'
-        const data = this.props.tiles[index]
+        const data = this.props.tiles[index + (this.props.tileset * rows * cols)]
         if (data) {
           let pixelIndex = 0
           for (let py = 0; py < 8; py++) {
@@ -89,7 +90,7 @@ export default class TileSetSelector extends React.Component {
     const localY = e.clientY - bounds.top
     const col = Math.floor((localX - spacing) / (scale * 8 + spacing))
     const row = Math.floor((localY - spacing) / (scale * 8 + spacing))
-    return row * cols + col
+    return row * cols + col + (this.props.tileset * rows * cols)
   }
   
   hovering (e) {
@@ -164,13 +165,15 @@ export default class TileSetSelector extends React.Component {
     
     for (let spriteName in this.props.sprites) {
       const sprite = this.props.sprites[spriteName]
-      for (let k in sprite.data) {
-        const item = sprite.data[k]
-        if (item) {
-          if (item[0] === fromIndex) {
-            item[0] = toIndex
-          } else if(item[0] === toIndex) {
-            item[0] = fromIndex
+      if ((sprite.tileset || 0) === (this.props.tileset || 0)) {
+        for (let k in sprite.data) {
+          const item = sprite.data[k]
+          if (item) {
+            if (item[0] === fromIndex) {
+              item[0] = toIndex
+            } else if(item[0] === toIndex) {
+              item[0] = fromIndex
+            }
           }
         }
       }

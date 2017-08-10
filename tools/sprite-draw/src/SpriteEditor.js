@@ -13,7 +13,7 @@ export default class SpriteEditor extends React.Component {
       mousedown (info) {
         let tileRef = info.sprite.data[info.index]
         if (!tileRef) tileRef = info.sprite.data[info.index] = [0, false, false]
-        let tile = info.tiles[tileRef[0]]
+        let tile = info.tiles[tileRef[0] + (info.sprite.tileset || 0) * 64]
         let px = info.pixel.x - (info.tilePos.x * 8)
         let py = info.pixel.y - (info.tilePos.y * 8)
         if (tileRef[1]) {
@@ -194,8 +194,10 @@ export default class SpriteEditor extends React.Component {
     const ctx = this.canvas.getContext('2d')
     ctx.fillRect(0, 0, canvasWidth, canvasHeight)
     
+    const tilesetOffset = 64 * (sprite.tileset || 0)
+    
     // Draw each tile
-    ctx.fillStyle = '#ffffff'
+    ctx.fillStyle = '#00fff0'
     for (let row = 0; row < sprite.height; row++) {
       for (let col = 0; col < sprite.width; col++) {
         const data = sprite.data[row * sprite.width + col]
@@ -203,7 +205,7 @@ export default class SpriteEditor extends React.Component {
         const tileID = data[0]
         const flipX = data[1]
         const flipY = data[2]
-        const tile = this.props.tiles[tileID]
+        const tile = this.props.tiles[tileID + tilesetOffset]
         for (let y = 0; y < 8; y++) {
           for (let x = 0; x < 8; x++) {
             const refX = flipX ? 7 - x : x
@@ -243,11 +245,11 @@ export default class SpriteEditor extends React.Component {
     
     // Hovering over a tile
     if (this.state.tool && this.state.tool.hoverTile && this.state.hoverTile) {
-      ctx.strokeStyle = 'rgb(31, 222, 222)';
+      ctx.strokeStyle = 'rgb(222, 31, 220)';
       ctx.lineWidth = 3
       ctx.strokeRect(this.state.hoverTile.x * 8 * scale, this.state.hoverTile.y * 8 * scale, 8 * scale, 8 * scale)
     } else if (this.state.tool && this.state.hoverPixel) {
-      ctx.strokeStyle = 'rgb(31, 222, 222)';
+      ctx.strokeStyle = 'rgb(222, 31, 220)';
       ctx.lineWidth = 3
       ctx.strokeRect(this.state.hoverPixel.x * scale, this.state.hoverPixel.y * scale, scale, scale)
     }
@@ -359,10 +361,10 @@ export default class SpriteEditor extends React.Component {
   
   cycleTileSets () {
     const sprite = this.props.sprite
-    sprite.tileSet = ((sprite.tileSet + 1) || 1) % this.props.totalTilesets
+    sprite.tileset = ((sprite.tileset + 1) || 1) % this.props.totalTilesets
     this.forceUpdate()
-    if (this.onTileSetChange) {
-      this.onTileSetChange()
+    if (this.props.onTileSetChange) {
+      this.props.onTileSetChange()
     }
   }
   
@@ -375,7 +377,7 @@ export default class SpriteEditor extends React.Component {
         <Button onClick={e => this.setState({ resizing: true })}>Resize</Button>
       </SettingsItem>
       <SettingsItem>
-        <Button onClick={e => this.cycleTileSets()}>Tileset {sprite.tileSet || 0}</Button>
+        <Button onClick={e => this.cycleTileSets()}>Tileset {sprite.tileset || 0}</Button>
       </SettingsItem>
       <SettingsItem>
         <Button onClick={e => this.cycleScale()}>Scale: {this.state.scale}</Button>
