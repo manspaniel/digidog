@@ -1,16 +1,3 @@
-/*
- * SSD1306xLED - Drivers for SSD1306 controlled dot matrix OLED/PLED 128x64 displays
- *
- * @file: ssd1306xled.c
- * @created: 2014-08-12
- * @author: Neven Boyanov
- *
- * Source code available at: https://bitbucket.org/tinusaur/ssd1306xled
- *
- */
-
-// ----------------------------------------------------------------------------
-
 #include <stdlib.h>
 #include <avr/io.h>
 #include <util/delay.h>
@@ -20,6 +7,9 @@
 #include "ssd1306xled.h"
 #include "font6x8.h"
 #include "font8X16.h"
+#include "tiles.h"
+
+#define SPRITE_HEADER_SIZE 3
 
 // ----------------------------------------------------------------------------
 
@@ -173,8 +163,7 @@ void ssd1306_char_f6x8(uint8_t x, uint8_t y, const char ch[])
 	}
 }
 
-void ssd1306_char_f8x16(uint8_t x, uint8_t y,const char ch[])
-{
+void ssd1306_char_f8x16(uint8_t x, uint8_t y, const char ch[]) {
 	uint8_t c=0,i=0,j=0;
 	while (ch[j]!='\0')
 	{
@@ -267,4 +256,49 @@ uint8_t scaleByte (uint8_t byte, bool secondHalf) {
 		}
 	}
 	return out;
+}
+
+uint8_t getTileByte(uint8_t x, uint8_t tileRef, uint8_t tileset, bool flipTileX) {
+	bool flipX = (tileRef & 0x80) == 0x80;
+	bool flipY = (tileRef & 0x80) == 0x80;
+	if (flipTileX) {
+		flipX = !flipX;
+	}
+	
+	uint8_t tileIndex = tileset * 64 + (tileRef & 0x3f);
+	return pgm_read_byte(&TILESET[tileIndex * 8 + (flipX ? 7 - x : x)]);
+}
+
+void drawSprite(uint8_t x1, uint8_t y1, uint8_t sprite[]) {
+	drawSprite(x1, y1, sprite, NO_EFFECT);
+}
+
+uint8_t getSpriteWidth(uint8_t sprite[]) {
+	return pgm_read_byte(&sprite[2]) * 8;
+}
+
+uint8_t getSpriteHeight(uint8_t sprite[]) {
+	return pgm_read_byte(&sprite[1]) * 8;
+}
+
+void drawSprite(uint8_t x1, uint8_t y1, uint8_t sprite[], SpriteEffect effect) {
+	
+	uint8_t tileset = pgm_read_byte(&sprite[0]);
+	uint8_t rows = pgm_read_byte(&sprite[1]);
+	uint8_t cols = pgm_read_byte(&sprite[2]);
+	
+	uint16_t offset = y1 % 8;
+	for (uint8_t y = 0; y <= rows; y++) {
+		ssd1306_setpos(x1, y1 / 8 + y);
+		ssd1306_send_data_start();
+		for (uint8_t x = 0; x < cols; x++) {
+			for (uint8_t k = 0; k < 8; k++) {
+				uint8_t fore = y == 0 ? 0 : getTileByte(k, pgm_read_byte(&sprite[(y - 1) * cols + (effect & FLIP_X ? cols - x - 1 : x) + SPRITE_HEADER_SIZE]), tileset, effect & FLIP_X);
+				uint8_t cur = y == rows ? 0 : getTileByte(k, pgm_read_byte(&sprite[y * cols + (effect & FLIP_X ? cols - x - 1 : x) + SPRITE_HEADER_SIZE]), tileset, effect & FLIP_X);
+				ssd1306_send_byte((fore >> (8 - offset)) | (cur << offset));
+			}
+		}
+		ssd1306_send_data_stop();
+	}
+	
 }

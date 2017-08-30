@@ -22,6 +22,9 @@ export default class TileSetSelector extends React.Component {
         props.tiles[k] = blank
       }
     }
+    
+    console.log('Resizing to', props.totalTilesets * 64)
+    props.tiles.splice(props.totalTilesets * 64);
   }
   
   setCanvas (el) {

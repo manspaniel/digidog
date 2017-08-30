@@ -17,14 +17,19 @@
 // ---------------------	// Vcc,	Pin 1 on SSD1306 Board
 // ---------------------	// GND,	Pin 2 on SSD1306 Board
 #ifndef SSD1306_SCL
-#define SSD1306_SCL		PB0	// SCL,	Pin 3 on SSD1306 Board
+#define SSD1306_SCL		PB1	// SCL,	Pin 3 on SSD1306 Board
 #endif
 #ifndef SSD1306_SDA
-#define SSD1306_SDA		PB1	// SDA,	Pin 4 on SSD1306 Board
+#define SSD1306_SDA		PB0	// SDA,	Pin 4 on SSD1306 Board
 #endif
 #ifndef SSD1306_SA
 #define SSD1306_SA		0x78	// Slave address
 #endif
+
+enum SpriteEffect {
+  NO_EFFECT = 0x0,
+  FLIP_X = 0x1
+};
 
 // ----------------------------------------------------------------------------
 
@@ -43,6 +48,11 @@ void ssd1306_char_f16x16(uint8_t x, uint8_t y, uint8_t N);
 void ssd1306_draw_bmp(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t bitmap[], bool flipped);
 void ssd1306_draw_bmp(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t bitmap[]);
 void ssd1306_fill_range(uint8_t x1, uint8_t x2, uint8_t fill_data);
+
+void drawSprite(uint8_t x, uint8_t y, uint8_t sprite[], SpriteEffect effect);
+void drawSprite(uint8_t x, uint8_t y, uint8_t sprite[]);
+uint8_t getSpriteHeight(uint8_t sprite[]);
+uint8_t getSpriteWidth(uint8_t sprite[]);
 
 // ----------------------------------------------------------------------------
 

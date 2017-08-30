@@ -32,7 +32,7 @@ const generateTileCode = (data) => {
       for (let y = 0; y < 8; y++) {
         let pixelVal = tile[y * 8 + x]
         if (pixelVal) {
-          n = n | (1 << (7 - y))
+          n = n | (1 << (y))
         }
       }
       arr.push(hexify(n))

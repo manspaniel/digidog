@@ -1,10 +1,18 @@
 #include <Arduino.h>
 #include "ssd1306xled.h"
 #include "bitmaps.h"
+#include "tiles.h"
 
 enum DogMode {
   PET,
   IN_MENU
+};
+
+enum ButtonID {
+  NO_BUTTON,
+  MENU_BUTTON,
+  OK_BUTTON,
+  CANCEL_BUTTON
 };
 
 enum DogAnim {
@@ -28,6 +36,10 @@ public:
   uint8_t lastDrawnX = 0;
   uint8_t x = 0;
   uint8_t y = 0;
+  
+  ButtonID buttonDown = NO_BUTTON;
+  ButtonID buttonUp = NO_BUTTON;
+  ButtonID buttonHeld = NO_BUTTON;
   
   // int timeTillNextTick = 0;
   bool justChangedMode = false;
@@ -74,7 +86,6 @@ public:
     justChangedAnim = true;
     currentMode = PET;
     currentAnim = anim;
-    
   }
   
   void loop () {
@@ -83,13 +94,20 @@ public:
     // timeTillNextTick -= frameDuration;
     
     if (currentMode == PET) {
-      // if (timeTillNextTick <= 0) {
-        bool isFirstFrame = justChangedAnim;
-        justChangedAnim = false;
-        drawAnimFrame(currentAnim, isFirstFrame);
-      // }
+      bool isFirstFrame = justChangedAnim;
+      justChangedAnim = false;
+      drawAnimFrame(currentAnim, isFirstFrame);
+      
+      if (buttonDown == OK_BUTTON) {
+        walk_flipped = !walk_flipped;
+      } else if (buttonDown == CANCEL_BUTTON) {
+        x = 0;
+        y = 0;
+      }
     }
     
+    buttonUp = NO_BUTTON;
+    buttonDown = NO_BUTTON;
     // ssd1306_char_f8x16(1, 2, "zzzzz");
     
   }
@@ -106,7 +124,7 @@ public:
       if (idle_timeTillWagFlip <= 0 || firstFrame) {
         idle_timeTillWagFlip = 500;
         idle_wagState = !idle_wagState;
-        drawDog(idle_wagState ? dog_wag : dog_standing);
+        drawDog(idle_wagState ? stand_left_wag : stand_left);
       }
       // timeTillNextTick = 10;
     } else if (anim == WALKING) {
@@ -145,7 +163,7 @@ public:
         }
         y = walk_startY + (walk_targetY - walk_startY) * (1 - (float)(walk_targetX - x) / (float)(walk_targetX - walk_startX));
         
-        drawDog(walk_alt ? dog_walk_1 : dog_walk_2);
+        drawDog(walk_alt ? walk_facing_1 : walk_facing_2);
         walk_timeTillNextStep = 50;
         
         if (x == walk_targetX) {
@@ -156,21 +174,22 @@ public:
     }
   }
   
-  void drawDog (uint8_t bitmap[], bool flipped) {
+  void drawDog (uint8_t sprite[], SpriteEffect effect) {
     uint8_t startClear;
     if (x > lastDrawnX) {
-      // Clear the section in front of the next bitmap
+      // Clear the section in front of the next sprite
       ssd1306_fill_range(lastDrawnX, x, 0x00);
     } else if(x < lastDrawnX) {
-      // Clear the section at the back of the bitmap
-      ssd1306_fill_range(x + 48, lastDrawnX + 48, 0x00);
+      // Clear the section at the back of the sprite
+      ssd1306_fill_range(x + 32, lastDrawnX + 32, 0x00);
     }
     lastDrawnX = x;
-    ssd1306_draw_bmp(x, y, 48, 48, bitmap, flipped);
+    drawSprite(x, y, sprite, effect);
+    //ssd1306_draw_bmp(x, y, 48, 48, sprite, flipped);
   }
   
-  void drawDog (uint8_t bitmap[]) {
-    drawDog(bitmap, walk_flipped);
+  void drawDog (uint8_t sprite[]) {
+    drawDog(sprite, walk_flipped ? FLIP_X : NO_EFFECT);
   }
   
   bool shouldWalk () {

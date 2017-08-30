@@ -76,15 +76,6 @@ export default class App extends Component {
     })
   }
   
-  componentDidUpdate (oldProps, newProps) {
-    if (oldProps.data !== this.props.data) {
-      // Got new data
-      this.setState({
-        sprite: null
-      })
-    }
-  }
-  
   render () {
     return (
       <EditorWrapper>

@@ -1,9 +1,6 @@
 #include <Arduino.h>
 #define F_CPU 8000000UL      //ATtiny85 CPU Clock speed (8MHz optimal[8000000], 1MHz Default[1000000])
 
-#define SSD1306_SCL   PB0 // SCL, Pin 3 on SSD1306 Board
-#define SSD1306_SDA   PB1 // SDA, Pin 4 on SSD1306 Board
- 
 #define SSD1306_SA    0x78  // Slave address
 
 #include <stdlib.h>
@@ -48,8 +45,7 @@ void setup(){
   ssd1306_init();
  
   ssd1306_fillscreen(0x00);
-  ssd1306_char_f8x16(1, 2, "VDOG");
-  ssd1306_char_f6x8(1, 5, "cutie");
+  // ssd1306_char_f8x16(1, 2, "VDOG");
   _delay_ms(1000);
  
   watchdog_counter = 0;
@@ -67,56 +63,82 @@ void setup(){
   pinMode(A2, INPUT);
   
 }
- 
+
+#define MIN_BUTTON_VALUE 100
+#define MENU_BUTTON_VALUE 230
+#define OK_BUTTON_VALUE 550
+#define CANCEL_BUTTON_VALUE 750
+
+#define BUTTON_TICKS_DELAY 1
+
+ButtonID getButtonNumber () {
+  int val = analogRead(A2);
+  if (val < MIN_BUTTON_VALUE) return NO_BUTTON;
+  int menuDiff = abs(val - MENU_BUTTON_VALUE);
+  int okDiff = abs(val - OK_BUTTON_VALUE);
+  int cancelDiff = abs(val - CANCEL_BUTTON_VALUE);
+  if (menuDiff < okDiff && menuDiff < cancelDiff) {
+    return MENU_BUTTON;
+  } else if (okDiff < menuDiff && okDiff < cancelDiff) {
+    return OK_BUTTON;
+  } else if (cancelDiff < menuDiff && cancelDiff < okDiff) {
+    return CANCEL_BUTTON;
+  }
+  return NO_BUTTON;
+}
+
+ButtonID lastButton = NO_BUTTON;
+uint8_t buttonCount = 0;
+
 void loop() {
   
   // sleep_mode();
   
+  // Figure out the current button
+  ButtonID val = getButtonNumber();
+  if (lastButton != val) {
+    // Button has changed, but wait a few cycles before notifying doggy
+    buttonCount = 0;
+    // Button up
+    // doggy.buttonDown = NO_BUTTON;
+    doggy.buttonHeld = NO_BUTTON;
+    doggy.buttonUp = doggy.buttonHeld;
+  } else {
+    // Button hasn't changed, but maybe we haven't notified
+    if (buttonCount < BUTTON_TICKS_DELAY) {
+      buttonCount++;
+      if (buttonCount == BUTTON_TICKS_DELAY) {
+        // Button was pressed
+        doggy.buttonDown = val;
+      }
+    } else {
+      // Button was held
+      // doggy.buttonDown = NO_BUTTON;
+      doggy.buttonHeld = val;
+      // doggy.buttonUp = NO_BUTTON;
+    }
+  }
+  
+  lastButton = val;
+  
   doggy.loop();
+  
+  
+  int signal = analogRead(A2);
+  
+  // ssd1306_fill_range(0, 60, 0x00);
+  char buffer[10];         //the ASCII of the integer will be stored in this char array
+  itoa(signal, buffer, 10);
+  ssd1306_char_f8x16(0, 0, buffer);
   
   // delay(100);
   
   // watchdog_counter = analogRead(A2);
   //
+  // ssd1306_fill_range(0, 60, 0x00);
   // char buffer[10];         //the ASCII of the integer will be stored in this char array
-  // itoa(watchdog_counter, buffer, 10);
-  //
-  // ssd1306_char_f8x16(1, 2, "zzzzz");
-  // ssd1306_char_f8x16(1, 2, buffer);
-  //
-  // itoa(millis(), buffer, 10);
-  //
-  // ssd1306_char_f8x16(20, 3, buffer);
-  //
-  // delay(100);
-  
-  // ssd1306_fillscreen(0x00);
-  // ssd1306_char_f6x8(1, 0, "DANIEL LEVER"); //Cannot start at 0 for x. Gives problem
- 
-  // ssd1306_char_f6x8(1, 0, "I'm a small and mighty.");
-  // _delay_ms(5000);
-  
-  // ssd1306_setpos(60, 60);
-  // ssd1306_send_data_start();
-  
-  for (int i = 0; i < 10; i++) {
-    // int r = random() * 255;
-    // ssd1306_send_byte(214);
-  }
-  
-  // ssd1306_send_data_stop();
-  
-  // _delay_ms(1000);
-  
-  // ssd1306_draw_bmp(0, 0, 128, 8, tiny);
-  
-  // ssd1306_init();
-  
-  // delay(5000);
-  
-  // delay(100);
-  
-  // _delay_ms(500);
+  // itoa(val, buffer, 10);
+  // ssd1306_char_f6x8(0, 0, buffer);
   
   // setup_watchdog(8);
   // sleep_mode();

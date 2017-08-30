@@ -44,7 +44,7 @@ export default class SpriteEditor extends React.Component {
           }
         } else {
           // Normal left click draws the selected tile
-          tileRef[0] = this.props.selectedTile
+          tileRef[0] = this.props.selectedTile % 64
           tileRef[1] = false
           tileRef[1] = false
           this.redraw()
@@ -197,7 +197,7 @@ export default class SpriteEditor extends React.Component {
     const tilesetOffset = 64 * (sprite.tileset || 0)
     
     // Draw each tile
-    ctx.fillStyle = '#00fff0'
+    ctx.fillStyle = '#ffffff'
     for (let row = 0; row < sprite.height; row++) {
       for (let col = 0; col < sprite.width; col++) {
         const data = sprite.data[row * sprite.width + col]
@@ -245,11 +245,11 @@ export default class SpriteEditor extends React.Component {
     
     // Hovering over a tile
     if (this.state.tool && this.state.tool.hoverTile && this.state.hoverTile) {
-      ctx.strokeStyle = 'rgb(222, 31, 220)';
+      ctx.strokeStyle = 'rgb(31, 222, 222)';
       ctx.lineWidth = 3
       ctx.strokeRect(this.state.hoverTile.x * 8 * scale, this.state.hoverTile.y * 8 * scale, 8 * scale, 8 * scale)
     } else if (this.state.tool && this.state.hoverPixel) {
-      ctx.strokeStyle = 'rgb(222, 31, 220)';
+      ctx.strokeStyle = 'rgb(31, 222, 222)';
       ctx.lineWidth = 3
       ctx.strokeRect(this.state.hoverPixel.x * scale, this.state.hoverPixel.y * scale, scale, scale)
     }

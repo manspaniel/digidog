@@ -79,9 +79,11 @@ app.post('/data', function(req, res) {
       }))
     
     } catch(err) {
+      
       res.write(JSON.stringify({
         error: err.message
       }))
+      
     }
     
     res.end()

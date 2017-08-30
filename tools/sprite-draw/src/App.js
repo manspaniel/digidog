@@ -17,11 +17,7 @@ export default class App extends Component {
   
   async load () {
     const response = await fetch('/data')
-    const data = await response.json()
-    if (data.error) {
-      alert('An error occurred: ' + data.error)
-      return
-    }
+    const data = await response.json();
     this.setState({
       loaded: true,
       data: data
@@ -30,31 +26,21 @@ export default class App extends Component {
   
   async save () {
     if (this.state.data) {
-      const response = await fetch('/data?action=persist', {
+      const data = await fetch('/data?action=persist', {
         method: 'POST',
         body: JSON.stringify(this.state.data)
       })
-      const data = await response.json()
-      if (data.error) {
-        alert('An error occurred: ' + data.error)
-      } else {
-        alert('Saved!');
-      }
+      alert('Saved!');
     }
   }
   
   async publish () {
     if (this.state.data) {
-      const response = await fetch('/data?action=publish', {
+      const data = await fetch('/data?action=publish', {
         method: 'POST',
         body: JSON.stringify(this.state.data)
       })
-      const data = await response.json()
-      if (data.error) {
-        alert('An error occurred: ' + data.error)
-      } else {
-        alert('Published tiles.h!');
-      }
+      alert('Published!');
     }
   }
   
@@ -68,7 +54,7 @@ export default class App extends Component {
         <AppFrame>
           <Toolbar>
             <Logo>Dog Editor</Logo>
-            <ToolButton onClick={e => this.publish()}>Publish</ToolButton>
+            <ToolButton onClick={e => this.publish()}>Finalize</ToolButton>
             <ToolButton onClick={e => this.load()}>Reload</ToolButton>
             <ToolButton onClick={e => this.save()}>Save</ToolButton>
           </Toolbar>
