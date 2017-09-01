@@ -58,7 +58,7 @@ export default class App extends Component {
             <ToolButton onClick={e => this.load()}>Reload</ToolButton>
             <ToolButton onClick={e => this.save()}>Save</ToolButton>
           </Toolbar>
-          <Editor data={this.state.data} totalTilesets={4} />
+          <Editor data={this.state.data} totalTilesets={3} />
         </AppFrame>
       )
     }

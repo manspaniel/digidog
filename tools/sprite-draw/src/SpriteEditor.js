@@ -22,7 +22,7 @@ export default class SpriteEditor extends React.Component {
         if (tileRef[2]) {
           py = 7 - py
         }
-        tile[py * 8 + px] = info.button === 0 ? 1 : 0
+        tile[py * 8 + px] = info.shiftKey ? 3 : info.button === 0 ? 1 : 0
         this.redraw()
         this.tileChanged()
         this.spriteChanged()
@@ -197,7 +197,6 @@ export default class SpriteEditor extends React.Component {
     const tilesetOffset = 64 * (sprite.tileset || 0)
     
     // Draw each tile
-    ctx.fillStyle = '#ffffff'
     for (let row = 0; row < sprite.height; row++) {
       for (let col = 0; col < sprite.width; col++) {
         const data = sprite.data[row * sprite.width + col]
@@ -211,7 +210,8 @@ export default class SpriteEditor extends React.Component {
             const refX = flipX ? 7 - x : x
             const refY = flipY ? 7 - y : y
             const pixelIndex = refY * 8 + refX
-            if (tile[pixelIndex] === 1) {
+            if (tile[pixelIndex]) {
+              ctx.fillStyle = tile[pixelIndex] === 1 ? '#ffffff' : '#575757'
               ctx.fillRect(
                 col * 8 * scale + x * scale,
                 row * 8 * scale + y * scale,
@@ -296,6 +296,7 @@ export default class SpriteEditor extends React.Component {
   }
   
   handleMouseDown (e, dragging) {
+    e.preventDefault()
     this.mouseDown = true
     if (!dragging) {
       this.mouseButton = e.button
@@ -312,6 +313,7 @@ export default class SpriteEditor extends React.Component {
         sprite: this.props.sprite,
         tiles: this.props.tiles,
         pixel: pos,
+        shiftKey: e.shiftKey,
         dragging: !!dragging
       })
     }

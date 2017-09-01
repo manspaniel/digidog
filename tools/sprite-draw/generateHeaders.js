@@ -25,17 +25,22 @@ const hexify = (n) => {
 
 const generateTileCode = (data) => {
   const arr = []
-  for (let index in data.tiles) {
+  for (let index in data.tiles.slice(0, 64 * 2)) {
     let tile = data.tiles[index]
     for (let x = 0; x < 8; x++) {
-      let n = 0
+      let color = 0
+      let alpha = 0
       for (let y = 0; y < 8; y++) {
         let pixelVal = tile[y * 8 + x]
-        if (pixelVal) {
-          n = n | (1 << (y))
+        console.log(pixelVal)
+        if (pixelVal === 1) {
+          color = color | (1 << (y))
+        } else if (pixelVal === 2) {
+          alpha = alpha | (1 << (y))
         }
       }
-      arr.push(hexify(n))
+      arr.push(hexify(color))
+      arr.push(hexify(alpha))
     }
   }
   return commentLine('The tile bitmap data') + variableDeclaration('TILESET') + formatArrayValues(arr)

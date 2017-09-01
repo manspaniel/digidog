@@ -23,7 +23,6 @@ export default class TileSetSelector extends React.Component {
       }
     }
     
-    console.log('Resizing to', props.totalTilesets * 64)
     props.tiles.splice(props.totalTilesets * 64);
   }
   
@@ -63,17 +62,17 @@ export default class TileSetSelector extends React.Component {
         }
         
         // Draw empty cell
-        ctx.fillStyle = '#000000'
+        ctx.fillStyle = '#2b1559'
         ctx.fillRect(x, y, scale * 8, scale * 8)
         
         // Draw individual pixels
-        ctx.fillStyle = '#ffffff'
         const data = this.props.tiles[index + (this.props.tileset * rows * cols)]
         if (data) {
           let pixelIndex = 0
           for (let py = 0; py < 8; py++) {
             for (let px = 0; px < 8; px++) {
-              if (data[pixelIndex] === 1) {
+              if (data[pixelIndex]) {
+                ctx.fillStyle = data[pixelIndex] === 1 ? '#ffffff' : '#ff00f5'
                 ctx.fillRect(x + px * scale, y + py * scale, scale, scale)
               }
               pixelIndex++
@@ -163,6 +162,8 @@ export default class TileSetSelector extends React.Component {
     const from = this.props.tiles[fromIndex]
     const to = this.props.tiles[toIndex]
     
+    console.log('FROM TO', fromIndex, toIndex)
+    
     this.props.tiles[fromIndex] = to
     this.props.tiles[toIndex] = from
     
@@ -172,10 +173,10 @@ export default class TileSetSelector extends React.Component {
         for (let k in sprite.data) {
           const item = sprite.data[k]
           if (item) {
-            if (item[0] === fromIndex) {
-              item[0] = toIndex
-            } else if(item[0] === toIndex) {
-              item[0] = fromIndex
+            if (item[0] === fromIndex % 64) {
+              item[0] = toIndex % 64
+            } else if(item[0] === toIndex % 64) {
+              item[0] = fromIndex % 64
             }
           }
         }
