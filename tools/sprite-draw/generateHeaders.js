@@ -25,7 +25,7 @@ const hexify = (n) => {
 
 const generateTileCode = (data) => {
   const arr = []
-  for (let index in data.tiles.slice(0, 64 * 2)) {
+  for (let index in data.tiles.slice(0, 64 * 3)) {
     let tile = data.tiles[index]
     for (let x = 0; x < 8; x++) {
       let color = 0
@@ -35,7 +35,7 @@ const generateTileCode = (data) => {
         console.log(pixelVal)
         if (pixelVal === 1) {
           color = color | (1 << (y))
-        } else if (pixelVal === 2) {
+        } else if (pixelVal === 3) {
           alpha = alpha | (1 << (y))
         }
       }
@@ -79,11 +79,15 @@ const generateSpriteCode = (name, sprite) => {
 module.exports = function generateHeaders (data) {
   const sections = []
   
+  sections.push('#ifndef TILESET_H\n#define TILESET_H')
+  
   sections.push(generateTileCode(data))
   
   for (let key in data.sprites) {
     sections.push(generateSpriteCode(key, data.sprites[key]))
   }
+  
+  sections.push('#endif')
   
   return sections.join('\n\n')
   

@@ -113,9 +113,9 @@ void loop() {
       }
     } else {
       // Button was held
-      // doggy.buttonDown = NO_BUTTON;
+      doggy.buttonDown = NO_BUTTON;
       doggy.buttonHeld = val;
-      // doggy.buttonUp = NO_BUTTON;
+      doggy.buttonUp = NO_BUTTON;
     }
   }
   
@@ -124,12 +124,12 @@ void loop() {
   doggy.loop();
   
   
-  int signal = analogRead(A2);
+  // int signal = analogRead(A2);
   
   // ssd1306_fill_range(0, 60, 0x00);
-  char buffer[10];         //the ASCII of the integer will be stored in this char array
-  itoa(signal, buffer, 10);
-  ssd1306_char_f8x16(0, 0, buffer);
+  // char buffer[10];         //the ASCII of the integer will be stored in this char array
+  // itoa(signal, buffer, 10);
+  // ssd1306_char_f8x16(0, 0, buffer);
   
   // delay(100);
   
