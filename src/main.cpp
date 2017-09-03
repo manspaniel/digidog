@@ -39,7 +39,7 @@ void setup_watchdog(int timerPrescaler) {
   WDTCR |= _BV(WDIE); //Set the interrupt enable, this will keep unit from resetting after each int
 }
 
-void setup(){
+void setup() {
   // Small delay is necessary if ssd1306_initis the first operation in the application.
   // _delay_ms(40);
   ssd1306_init();
@@ -61,6 +61,8 @@ void setup(){
   // }
   
   pinMode(A2, INPUT);
+  
+  doggy.start();
   
 }
 

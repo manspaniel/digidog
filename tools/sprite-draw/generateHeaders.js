@@ -35,7 +35,8 @@ const generateTileCode = (data) => {
         console.log(pixelVal)
         if (pixelVal === 1) {
           color = color | (1 << (y))
-        } else if (pixelVal === 3) {
+        }
+        if (pixelVal !== 3) {
           alpha = alpha | (1 << (y))
         }
       }

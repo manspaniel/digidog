@@ -23,21 +23,29 @@ public:
   
   Sprite * sprite1;
   Sprite * sprite2;
+  Sprite * sprite3;
   
   int xDir = 1;
   int yDir = 1;
   
   VDoggy () {
     display.tileset = TILESET;
+  }
+  
+  void start () {
+    sprite2 = display.addSprite(walk_facing_1);
+    sprite2->x = 16;
+    sprite2->y = 0;
+    
+    sprite3 = display.addSprite(walk_facing_1);
+    sprite3->x = 16;
+    sprite3->y = 20;
     
     sprite1 = display.addSprite(scene_room);
     sprite1->x = 0;
     sprite1->y = 0;
     
-    sprite2 = display.addSprite(walk_facing_1);
-    sprite2->x = 16;
-    sprite2->y = 0;
-    
+    display.renderRect(0, 0, 128, 64);
   }
   
   float t = 0;
@@ -63,14 +71,18 @@ public:
       xDir = 1;
     }
     
-    if (sprite2->y > 32) {
+    if (sprite2->y >= 32) {
       yDir = -1;
     } else if (sprite2->y <= 0) {
       yDir = 1;
       sprite2->y = 0;
     }
     
-    display.renderRect(0, 0, 128, 64);
+    sprite2->needsUpdate = true;
+    
+    display.update();
+    
+    // display.renderRect(sprite2->x - 2, sprite2->y - 2, sprite2->width + 4, sprite2->height + 4);
     
     // if (sprite2->y == 0) {
     //   delay(500);
