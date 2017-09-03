@@ -211,8 +211,10 @@ public:
   
   void setDirtyRect(int16_t x, int16_t y, int16_t w, int16_t h) {
     // if (x)
-    for (uint8_t row = y / 8; row < y / 8 + h / 8 + 1; row++) {
-      for (uint32_t col = x / 4; col < x / 4 + w / 4; col++) {
+    uint8_t endRow = y / 8 + h / 8 + 1;
+    uint8_t endCol = x / 4 + w / 4 + 1;
+    for (uint8_t row = y / 8; row < endRow; row++) {
+      for (uint32_t col = x / 4; col < endCol; col++) {
         dirtyCells[row] = dirtyCells[row] | ((uint32_t)1 << col);
       }
     }

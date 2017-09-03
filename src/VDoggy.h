@@ -33,7 +33,7 @@ public:
   }
   
   void start () {
-    sprite2 = display.addSprite(walk_facing_1);
+    sprite2 = display.addSprite(square_test);
     sprite2->x = 16;
     sprite2->y = 0;
     
@@ -83,7 +83,7 @@ public:
     
     display.update();
     
-    sprite1->active = false;
+    // sprite1->active = false;
     
     // display.renderRect(sprite2->x - 2, sprite2->y - 2, sprite2->width + 4, sprite2->height + 4);
     
