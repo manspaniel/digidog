@@ -209,10 +209,11 @@ public:
     
   }
   
-  void setDirtyRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
+  void setDirtyRect(int16_t x, int16_t y, int16_t w, int16_t h) {
+    // if (x)
     for (uint8_t row = y / 8; row < y / 8 + h / 8 + 1; row++) {
-      for (uint8_t col = x / 4; col < x / 4 + w / 4; col++) {
-        dirtyCells[row] = dirtyCells[row] | (1 << (col));
+      for (uint32_t col = x / 4; col < x / 4 + w / 4; col++) {
+        dirtyCells[row] = dirtyCells[row] | ((uint32_t)1 << col);
       }
     }
   }
@@ -249,18 +250,25 @@ public:
     uint8_t x = 0;
     uint8_t y = 0;
     for (uint8_t cellRow = 0; cellRow < 8; cellRow++) {
+      uint32_t dirtyMapRow = dirtyCells[cellRow];
+      
       // Skip this row, if there's nothing
-      if (dirtyCells[cellRow] == 0) continue;
+      if (dirtyMapRow == 0) continue;
       
       // Mark the row as clean
       dirtyCells[cellRow] = 0;
       
       bool rendering = false;
       
+      // Start the cell bit (used for mask testing) at zero
+      // It'll be set to 1 and shifted each time
+      uint32_t cellBit = 0;
+      
       // Render the row, cell by cell (a cell being 4 bytes)
       for (uint8_t cellCol = 0; cellCol < 32; cellCol++) {
+        cellBit = cellBit == 0 ? 1 : (cellBit << 1);
         // Skip this cell, if there's nothing
-        if (dirtyCells[cellRow] & (1 << cellCol) == 0) {
+        if ((dirtyMapRow & cellBit) == 0) {
           // Send the stop signal if we rendered the last cell
           if (rendering) {
             ssd1306_send_data_stop();

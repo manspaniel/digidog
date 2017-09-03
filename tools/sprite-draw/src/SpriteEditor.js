@@ -147,10 +147,13 @@ export default class SpriteEditor extends React.Component {
     // Transpose the existing tile layout into the new resized version
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        sprite.data.push(oldData[y * oldWidth + x] || [0, false, false])
+        const existing = oldData[y * oldWidth + x]
+        sprite.data.push(existing && y < oldHeight && x < oldWidth ? existing : [0, false, false])
       }
     }
-    this.redraw()
+    this.setState({
+      resizing: false
+    })
   }
   
   setCanvas (el) {

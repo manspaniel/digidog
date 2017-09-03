@@ -40,6 +40,7 @@ public:
     sprite3 = display.addSprite(walk_facing_1);
     sprite3->x = 16;
     sprite3->y = 20;
+    sprite3->active = false;
     
     sprite1 = display.addSprite(scene_room);
     sprite1->x = 0;
@@ -81,6 +82,8 @@ public:
     sprite2->needsUpdate = true;
     
     display.update();
+    
+    sprite1->active = false;
     
     // display.renderRect(sprite2->x - 2, sprite2->y - 2, sprite2->width + 4, sprite2->height + 4);
     
