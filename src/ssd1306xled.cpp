@@ -7,7 +7,6 @@
 #include "ssd1306xled.h"
 #include "font6x8.h"
 #include "font8X16.h"
-#include "tiles.h"
 
 #define SPRITE_HEADER_SIZE 3
 
@@ -214,26 +213,26 @@ void ssd1306_char_f16x16(uint8_t x, uint8_t y, uint8_t N)
 	ssd1306_send_data_stop();
 }
 
-void ssd1306_draw_bmp(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t bitmap[]) {
-	ssd1306_draw_bmp(x0, y0, x1, y1, bitmap, false);
-}
-
-void ssd1306_draw_bmp(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t bitmap[], bool flipX) {
-	uint16_t offset = y0 % 8;
-	for (uint8_t page = 0; page <= y1 / 8; page++) {
-		uint8_t y = y0 / 8 + page;
-		if (y > 7 || y < 0) continue;
-		ssd1306_setpos(x0, y);
-		ssd1306_send_data_start();
-		for (uint8_t x = 0; x < x1; x++) {
-			if (x > 128 || x < 0) continue;
-			uint8_t fore = page == 0 ? 0 : pgm_read_byte(&bitmap[(page - 1) * x1 + (flipX ? x1 - x - 1 : x)]);
-			uint8_t cur = page == (y1 / 8) ? 0 : pgm_read_byte(&bitmap[page * x1 + (flipX ? x1 - x - 1 : x)]);
-			ssd1306_send_byte((fore >> (8 - offset)) | (cur << offset));
-		}
-		ssd1306_send_data_stop();
-	}
-}
+// void ssd1306_draw_bmp(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t bitmap[]) {
+// 	ssd1306_draw_bmp(x0, y0, x1, y1, bitmap, false);
+// }
+//
+// void ssd1306_draw_bmp(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t bitmap[], bool flipX) {
+// 	uint16_t offset = y0 % 8;
+// 	for (uint8_t page = 0; page <= y1 / 8; page++) {
+// 		uint8_t y = y0 / 8 + page;
+// 		if (y > 7 || y < 0) continue;
+// 		ssd1306_setpos(x0, y);
+// 		ssd1306_send_data_start();
+// 		for (uint8_t x = 0; x < x1; x++) {
+// 			if (x > 128 || x < 0) continue;
+// 			uint8_t fore = page == 0 ? 0 : pgm_read_byte(&bitmap[(page - 1) * x1 + (flipX ? x1 - x - 1 : x)]);
+// 			uint8_t cur = page == (y1 / 8) ? 0 : pgm_read_byte(&bitmap[page * x1 + (flipX ? x1 - x - 1 : x)]);
+// 			ssd1306_send_byte((fore >> (8 - offset)) | (cur << offset));
+// 		}
+// 		ssd1306_send_data_stop();
+// 	}
+// }
 
 void ssd1306_fill_range(uint8_t x1, uint8_t x2, uint8_t fill_data) {
 	for (uint8_t page = 0; page < 8; page++) {
@@ -246,59 +245,59 @@ void ssd1306_fill_range(uint8_t x1, uint8_t x2, uint8_t fill_data) {
 	}
 }
 
-uint8_t scaleByte (uint8_t byte, bool secondHalf) {
-	// return byte;
-	if (secondHalf) byte = byte >> 4;
-	uint8_t out = 0;
-	for (uint8_t i = 0; i < 8; i++) {
-		if ((byte >> (uint8_t)floor(i / 2)) & 1) {
-			out = out | (1 << i);
-		}
-	}
-	return out;
-}
+// uint8_t scaleByte (uint8_t byte, bool secondHalf) {
+// 	// return byte;
+// 	if (secondHalf) byte = byte >> 4;
+// 	uint8_t out = 0;
+// 	for (uint8_t i = 0; i < 8; i++) {
+// 		if ((byte >> (uint8_t)floor(i / 2)) & 1) {
+// 			out = out | (1 << i);
+// 		}
+// 	}
+// 	return out;
+// }
 
-uint8_t getTileByte(uint8_t x, uint8_t tileRef, uint8_t tileset, bool flipTileX) {
-	bool flipX = (tileRef & 0x80) == 0x80;
-	bool flipY = (tileRef & 0x80) == 0x80;
-	if (flipTileX) {
-		flipX = !flipX;
-	}
-	
-	uint8_t tileIndex = tileset * 64 + (tileRef & 0x3f);
-	return pgm_read_byte(&TILESET[tileIndex * 8 + (flipX ? 7 - x : x)]);
-}
+// uint8_t getTileByte(uint8_t x, uint8_t tileRef, uint8_t tileset, bool flipTileX) {
+// 	bool flipX = (tileRef & 0x80) == 0x80;
+// 	bool flipY = (tileRef & 0x80) == 0x80;
+// 	if (flipTileX) {
+// 		flipX = !flipX;
+// 	}
+//
+// 	uint8_t tileIndex = tileset * 64 + (tileRef & 0x3f);
+// 	return pgm_read_byte(&TILESET[tileIndex * 8 + (flipX ? 7 - x : x)]);
+// }
 
-void drawSprite(uint8_t x1, uint8_t y1, uint8_t sprite[]) {
-	drawSprite(x1, y1, sprite, NO_EFFECT);
-}
+// void drawSprite(uint8_t x1, uint8_t y1, uint8_t sprite[]) {
+// 	drawSprite(x1, y1, sprite, NO_EFFECT);
+// }
+//
+// uint8_t getSpriteWidth(uint8_t sprite[]) {
+// 	return pgm_read_byte(&sprite[2]) * 8;
+// }
+//
+// uint8_t getSpriteHeight(uint8_t sprite[]) {
+// 	return pgm_read_byte(&sprite[1]) * 8;
+// }
 
-uint8_t getSpriteWidth(uint8_t sprite[]) {
-	return pgm_read_byte(&sprite[2]) * 8;
-}
-
-uint8_t getSpriteHeight(uint8_t sprite[]) {
-	return pgm_read_byte(&sprite[1]) * 8;
-}
-
-void drawSprite(uint8_t x1, uint8_t y1, uint8_t sprite[], SpriteEffect effect) {
-	
-	uint8_t tileset = pgm_read_byte(&sprite[0]);
-	uint8_t rows = pgm_read_byte(&sprite[1]);
-	uint8_t cols = pgm_read_byte(&sprite[2]);
-	
-	uint16_t offset = y1 % 8;
-	for (uint8_t y = 0; y <= rows; y++) {
-		ssd1306_setpos(x1, y1 / 8 + y);
-		ssd1306_send_data_start();
-		for (uint8_t x = 0; x < cols; x++) {
-			for (uint8_t k = 0; k < 8; k++) {
-				uint8_t fore = y == 0 ? 0 : getTileByte(k, pgm_read_byte(&sprite[(y - 1) * cols + (effect & FLIP_X ? cols - x - 1 : x) + SPRITE_HEADER_SIZE]), tileset, effect & FLIP_X);
-				uint8_t cur = y == rows ? 0 : getTileByte(k, pgm_read_byte(&sprite[y * cols + (effect & FLIP_X ? cols - x - 1 : x) + SPRITE_HEADER_SIZE]), tileset, effect & FLIP_X);
-				ssd1306_send_byte((fore >> (8 - offset)) | (cur << offset));
-			}
-		}
-		ssd1306_send_data_stop();
-	}
-	
-}
+// void drawSprite(uint8_t x1, uint8_t y1, uint8_t sprite[], SpriteEffect effect) {
+//
+// 	uint8_t tileset = pgm_read_byte(&sprite[0]);
+// 	uint8_t rows = pgm_read_byte(&sprite[1]);
+// 	uint8_t cols = pgm_read_byte(&sprite[2]);
+//
+// 	uint16_t offset = y1 % 8;
+// 	for (uint8_t y = 0; y <= rows; y++) {
+// 		ssd1306_setpos(x1, y1 / 8 + y);
+// 		ssd1306_send_data_start();
+// 		for (uint8_t x = 0; x < cols; x++) {
+// 			for (uint8_t k = 0; k < 8; k++) {
+// 				uint8_t fore = y == 0 ? 0 : getTileByte(k, pgm_read_byte(&sprite[(y - 1) * cols + (effect & FLIP_X ? cols - x - 1 : x) + SPRITE_HEADER_SIZE]), tileset, effect & FLIP_X);
+// 				uint8_t cur = y == rows ? 0 : getTileByte(k, pgm_read_byte(&sprite[y * cols + (effect & FLIP_X ? cols - x - 1 : x) + SPRITE_HEADER_SIZE]), tileset, effect & FLIP_X);
+// 				ssd1306_send_byte((fore >> (8 - offset)) | (cur << offset));
+// 			}
+// 		}
+// 		ssd1306_send_data_stop();
+// 	}
+//
+// }

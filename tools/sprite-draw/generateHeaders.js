@@ -32,7 +32,6 @@ const generateTileCode = (data) => {
       let alpha = 0
       for (let y = 0; y < 8; y++) {
         let pixelVal = tile[y * 8 + x]
-        console.log(pixelVal)
         if (pixelVal === 1) {
           color = color | (1 << (y))
         }

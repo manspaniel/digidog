@@ -16,7 +16,7 @@ struct Sprite {
   bool active = false;
   bool filtered = false;
   uint8_t tileset = 0;
-  uint8_t * data;
+  const uint8_t * data;
   int x = 0;
   int y = 0;
   uint8_t width = 0;
@@ -36,7 +36,7 @@ struct Sprite {
 
 class SpriteDisplay {
 public:
-  uint8_t * tileset;
+  const uint8_t * tileset;
   Sprite sprites[MAX_SPRITES];
   uint32_t dirtyCells[8];
   
@@ -48,7 +48,7 @@ public:
     }
   }
   
-  Sprite * addSprite (uint8_t * spriteData) {
+  Sprite * addSprite (const uint8_t * spriteData) {
     Sprite * sprite;
     for (uint8_t k = 0; k < MAX_SPRITES; k++) {
       sprite = &sprites[k];
@@ -94,118 +94,6 @@ public:
     }
     
     return value;
-    
-  }
-  
-  /*
-    Render a rectangle to the display
-  */
-  // void renderRect (int screenX, int screenY, int width, int height) {
-  //
-  //   for (int spriteID = 0; spriteID < MAX_SPRITES; spriteID++) {
-  //     Sprite * sprite = &sprites[spriteID];
-  //     sprite->filtered = rectsOverlap(screenX, screenY, width, height, sprite->x, sprite->y, sprite->width, sprite->height);
-  //   }
-  //
-  //   for (uint8_t y = (screenY / 8) * 8; y < screenY + height; y += 8) {
-  //     if (y / 8 == 8) continue;
-  //     ssd1306_setpos(screenX, y / 8);
-  //     ssd1306_send_data_start();
-  //     for (uint8_t x = screenX; x < screenX + width; x++) {
-  //       uint8_t color = 0;
-  //       uint8_t alpha = 0;
-  //       // Loop over each sprite which overlaps this rect
-  //       for (int spriteID = 0; spriteID < MAX_SPRITES; spriteID++) {
-  //         Sprite * sprite = &sprites[spriteID];
-  //         if (!sprite->active) continue;
-  //         if (sprite->y + sprite->height < y || sprite->y >= y + 8) continue;
-  //         if (sprite->x + sprite->width <= x || sprite->x > x) continue;
-  //
-  //         // Offset is the distance between the current cell and the start of the sprite.
-  //         // It's always positive
-  //         int offsetX = x - sprite->x;
-  //         int offsetY = y - sprite->y;
-  //
-  //         int shiftY = 0;
-  //         int shiftX = offsetX % 8;
-  //
-  //         // We're currently in a screen cell, which is 1x8 pixels
-  //         // We've already determined that the current sprite overlaps that cell in some way
-  //         // Either 1 or 2 tiles of this sprite are overlapping
-  //         // - 1 tile taking up the entire space, if this sprite is aligned by 8
-  //         // - 1 tile, offset downwards, if sprite.y > y
-  //         // - 1 tile, offset upwards, if sprite.y + sprite.height > y && sprite.y < y + 8
-  //         // - or 2 tiles otherwise
-  //         //  - in this case, the topmost
-  //         bool showFirst = false;
-  //         uint8_t firstCol = 0;
-  //         uint8_t firstRow = 0;
-  //
-  //         bool showSecond = false;
-  //         uint8_t secondCol = 0;
-  //         uint8_t secondRow = 0;
-  //
-  //         if (sprite->y % 8 == 0) {
-  //           // The sprite is aligned by 8 on the Y axis, so only one to show, and no y shifting needed
-  //           showFirst = true;
-  //           firstCol = offsetX / 8;
-  //           firstRow = offsetY / 8;
-  //           if (firstRow == sprite->rows) {
-  //             showFirst = false;
-  //           }
-  //         } else if (sprite->y > y) {
-  //           // The sprite starts further down in this cell
-  //           showFirst = true;
-  //           firstCol = offsetX / 8;
-  //           firstRow = 0;
-  //           shiftY = sprite->y % 8;
-  //         } else if (sprite->y + sprite->height < y + 8) {
-  //           // The sprite ends during this cell
-  //           showSecond = true;
-  //           secondCol = offsetX / 8;
-  //           secondRow = sprite->rows - 1;
-  //           shiftY = sprite->y % 8;
-  //         } else {
-  //           // Both!
-  //           showFirst = true;
-  //           firstCol = offsetX / 8;
-  //           firstRow = offsetY / 8 + 1;
-  //           shiftY = sprite->y % 8;
-  //
-  //           showSecond = true;
-  //           secondCol = offsetX / 8;
-  //           secondRow = offsetY / 8;
-  //         }
-  //
-  //         uint8_t cellColor = 0;
-  //         uint8_t cellAlpha = 0;
-  //
-  //         if (showFirst) {
-  //           uint8_t a = getTileByte(sprite, firstCol, firstRow, shiftX, true);
-  //           cellAlpha = cellAlpha | (a << shiftY);
-  //           uint8_t b = getTileByte(sprite, firstCol, firstRow, shiftX, false);
-  //           cellColor = cellColor | (b << shiftY);
-  //           // cellAlpha = getTileByte(sprite, firstCol, firstRow, shiftX, true);
-  //           // val = val | (cell << shiftY);
-  //         }
-  //         if (showSecond) {
-  //           uint8_t a = getTileByte(sprite, secondCol, secondRow, shiftX, true);
-  //           cellAlpha = cellAlpha | (a >> (8 - shiftY));
-  //           uint8_t b = getTileByte(sprite, secondCol, secondRow, shiftX, false);
-  //           cellColor = cellColor | (b >> (8 - shiftY));
-  //         }
-  //
-  //         color = color | (~alpha & cellColor & cellAlpha);
-  //         alpha = alpha | cellAlpha;
-  //
-  //       }
-  //       ssd1306_send_byte(color);
-  //     }
-  //     ssd1306_send_data_stop();
-  //   }
-  // }
-  
-  void renderRect (int screenX, int screenY, int width, int height) {
     
   }
   
@@ -289,7 +177,7 @@ public:
         // The display requires that each byte sent (1 byte = 8 x pixels)
         // is byte-aligned on the Y axis (0-7).
         // We group by 4 as a balancing act, so that the dirtyCells
-        // grid isn't too big, but also the grid is small enough that\
+        // grid isn't too big, but also the grid is small enough that
         // we're not over-rendering too much.
         y = cellRow * 8;
         for (uint8_t cellN = 0; cellN < 4; cellN++) {

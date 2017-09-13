@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#define F_CPU 8000000UL      //ATtiny85 CPU Clock speed (8MHz optimal[8000000], 1MHz Default[1000000])
+// #define F_CPU 8000000UL      //ATtiny85 CPU Clock speed (8MHz optimal[8000000], 1MHz Default[1000000])
 
 #define SSD1306_SA    0x78  // Slave address
 
@@ -10,10 +10,17 @@
 #include <avr/sleep.h>
 
 #include "ssd1306xled.h"
-#include "VDoggy.h"
-// #include "out.h"
+#include "DigiDog.h"
 
-VDoggy doggy;
+// void * operator new(size_t size) {
+//   return malloc(size);
+// }
+//
+// void operator delete(void * ptr) {
+//   free(ptr);
+// }
+
+DigiDog doggy;
 
 volatile int watchdog_counter;
 
@@ -66,62 +73,12 @@ void setup() {
   
 }
 
-#define MIN_BUTTON_VALUE 100
-#define MENU_BUTTON_VALUE 230
-#define OK_BUTTON_VALUE 550
-#define CANCEL_BUTTON_VALUE 750
-
-#define BUTTON_TICKS_DELAY 1
-
-ButtonID getButtonNumber () {
-  int val = analogRead(A2);
-  if (val < MIN_BUTTON_VALUE) return NO_BUTTON;
-  int menuDiff = abs(val - MENU_BUTTON_VALUE);
-  int okDiff = abs(val - OK_BUTTON_VALUE);
-  int cancelDiff = abs(val - CANCEL_BUTTON_VALUE);
-  if (menuDiff < okDiff && menuDiff < cancelDiff) {
-    return MENU_BUTTON;
-  } else if (okDiff < menuDiff && okDiff < cancelDiff) {
-    return OK_BUTTON;
-  } else if (cancelDiff < menuDiff && cancelDiff < okDiff) {
-    return CANCEL_BUTTON;
-  }
-  return NO_BUTTON;
-}
-
-ButtonID lastButton = NO_BUTTON;
-uint8_t buttonCount = 0;
-
 void loop() {
   
   // sleep_mode();
   
   // Figure out the current button
-  ButtonID val = getButtonNumber();
-  if (lastButton != val) {
-    // Button has changed, but wait a few cycles before notifying doggy
-    buttonCount = 0;
-    // Button up
-    // doggy.buttonDown = NO_BUTTON;
-    doggy.buttonHeld = NO_BUTTON;
-    doggy.buttonUp = doggy.buttonHeld;
-  } else {
-    // Button hasn't changed, but maybe we haven't notified
-    if (buttonCount < BUTTON_TICKS_DELAY) {
-      buttonCount++;
-      if (buttonCount == BUTTON_TICKS_DELAY) {
-        // Button was pressed
-        doggy.buttonDown = val;
-      }
-    } else {
-      // Button was held
-      doggy.buttonDown = NO_BUTTON;
-      doggy.buttonHeld = val;
-      doggy.buttonUp = NO_BUTTON;
-    }
-  }
   
-  lastButton = val;
   
   doggy.loop();
   

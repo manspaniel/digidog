@@ -17,10 +17,10 @@
 // ---------------------	// Vcc,	Pin 1 on SSD1306 Board
 // ---------------------	// GND,	Pin 2 on SSD1306 Board
 #ifndef SSD1306_SCL
-#define SSD1306_SCL		PB1	// SCL,	Pin 3 on SSD1306 Board
+#define SSD1306_SCL		PA2	// SCL,	Pin 3 on SSD1306 Board
 #endif
 #ifndef SSD1306_SDA
-#define SSD1306_SDA		PB0	// SDA,	Pin 4 on SSD1306 Board
+#define SSD1306_SDA		PA1	// SDA,	Pin 4 on SSD1306 Board
 #endif
 #ifndef SSD1306_SA
 #define SSD1306_SA		0x78	// Slave address
