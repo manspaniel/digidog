@@ -1,22 +1,31 @@
 #include "HomeScene.h"
-// #include "io.h"
+#include "io.h"
+#include "DigiDog.h"
 
-void HomeScene::reset (SpriteDisplay * display) {
+// #include "SpriteDisplay.h"
+
+extern SpriteDisplay mainDisplay;
+extern DigiDog doggy;
+
+void HomeScene::reset () {
   x = 1;
   y = 1;
   xDir = 1;
   yDir = 1;
   ticksTillAlt = 5;
-  dogSprite = display->addSprite(walk_facing_1);
-  display->addSprite(scene_room);
+  dogSprite = mainDisplay.addSprite(walk_facing_1);
+  dogSprite->y = 24;
+  mainDisplay.addSprite(scene_room);
 };
 
-void HomeScene::loop (SpriteDisplay * display) {
+void HomeScene::loop () {
   
-  // if (wasButtonDown(MENU_BUTTON)) {
-  //   // dogInstance->goToScene(MENU_SCENE);
-  //   // goToScene
-  // }
+  if (buttonWasUp(MENU_BUTTON)) {
+    // x = 1;
+    doggy.goToScene(MENU_SCENE);
+    return;
+    // goToScene
+  }
   //
   if (x < 0) {
     xDir = 1;
@@ -35,6 +44,6 @@ void HomeScene::loop (SpriteDisplay * display) {
     dogSprite->data = wagged ? walk_facing_1 : walk_facing_2;
   }
   dogSprite->x = 8 + x;
-  // // dogSprite->y = 24;
+  // dogSprite->y = 24;
   dogSprite->needsUpdate = true;
 };

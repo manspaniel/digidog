@@ -12,8 +12,8 @@ struct HomeScene {
   bool wagged = false;
   uint8_t ticksTillAlt = 0;
   
-  void reset (SpriteDisplay * display);
-  void loop (SpriteDisplay * display);
+  void reset ();
+  void loop ();
 };
 
 #endif

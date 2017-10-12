@@ -10,18 +10,19 @@
 #include "scenes/MenuScene.h"
 
 enum SceneID {
-  NO_SCENE,
-  HOME_SCENE,
-  MENU_SCENE
+  NO_SCENE = 0,
+  HOME_SCENE = 1,
+  MENU_SCENE = 2
 };
+
+static char currentScene = HOME_SCENE;
 
 const unsigned int frameDuration = 10;
 
 class DigiDog {
 public:
-  SpriteDisplay display;
   
-  SceneID currentScene = NO_SCENE;
+  bool haveStarted = false;
   
   // Scenes
   HomeScene homeScene;
@@ -30,10 +31,10 @@ public:
   DigiDog();
   void start();
   void loop();
-  void goToScene (SceneID scene);
+  void goToScene (char scene);
   
 };
 
-// const DigiDog dogInstance;
+// static DigiDog * dogInstance;
 
 #endif

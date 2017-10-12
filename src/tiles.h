@@ -589,13 +589,12 @@ const uint8_t ui_progress_empty [] PROGMEM = {
   0x20, 0x21, 0xa0
 };
 
-// Sprite: ui_selection_arrow / 1x2 tiles / 8x16 pixels / tileset #1
+// Sprite: ui_selection_arrow / 1x1 tiles / 8x8 pixels / tileset #1
 const uint8_t ui_selection_arrow [] PROGMEM = {
   0x01, 
   0x01, 
-  0x02, 
-  0x11, 
-  0x10
+  0x01, 
+  0x11
 };
 
 // Sprite: ui_menu_frame / 16x8 tiles / 128x64 pixels / tileset #1
@@ -640,6 +639,14 @@ const uint8_t square_test [] PROGMEM = {
   0x0d, 0x00, 0x00, 0xcd, 
   0x0d, 0x00, 0x00, 0x8d, 
   0x41, 0x42, 0x42, 0xc1
+};
+
+// Sprite: ui_selection_arrow_alt / 1x1 tiles / 8x8 pixels / tileset #1
+const uint8_t ui_selection_arrow_alt [] PROGMEM = {
+  0x01, 
+  0x01, 
+  0x01, 
+  0x10
 };
 
 #endif

@@ -2,9 +2,9 @@
 #include <Arduino.h>
 
 #define MIN_BUTTON_VALUE 100
-#define MENU_BUTTON_VALUE 230
-#define OK_BUTTON_VALUE 550
-#define CANCEL_BUTTON_VALUE 750
+#define MENU_BUTTON_VALUE 310
+#define OK_BUTTON_VALUE 512
+#define CANCEL_BUTTON_VALUE 1000
 
 #define BUTTON_TICKS_DELAY 1
 
@@ -38,16 +38,18 @@ void updateButtonState() {
     // Button has changed, but wait a few cycles before notifying doggy
     buttonCount = 0;
     // Button up
+    _buttonUp = _buttonHeld;
     _buttonDown = NO_BUTTON;
     _buttonHeld = NO_BUTTON;
-    _buttonUp = _buttonHeld;
   } else {
     // Button hasn't changed, but maybe we haven't notified
     if (buttonCount < BUTTON_TICKS_DELAY) {
       buttonCount++;
       if (buttonCount == BUTTON_TICKS_DELAY) {
         // Button was pressed
+        _buttonUp = _buttonHeld;
         _buttonDown = val;
+        _buttonHeld = val;
       }
     } else {
       // Button was held
@@ -60,14 +62,14 @@ void updateButtonState() {
   lastButton = val;
 }
 
-bool wasButtonDown (ButtonID button) {
+bool buttonWasDown (ButtonID button) {
   return (_buttonDown == button);
 }
 
-bool wasButtonUp (ButtonID button) {
+bool buttonWasUp (ButtonID button) {
   return (_buttonUp == button);
 }
 
-bool wasButtonHeld (ButtonID button) {
+bool buttonWasHeld (ButtonID button) {
   return (_buttonHeld == button);
 }

@@ -1,11 +1,12 @@
-#ifndef SPRITE_DISPLAY_H
-#define SPRITE_DISPLAY_H
+#ifndef SPRITE_DISPLAYM_H
+#define SPRITE_DISPLAYM_H
 
 #include <stdlib.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include "ssd1306xled.h"
 #include "tiles.h"
+#include "font6x8.h"
 
 #define MAX_SPRITES               16
 #define SPRITE_HEADER_SIZE        3
@@ -13,20 +14,18 @@
 class SpriteDisplay;
 
 struct Sprite {
-  bool active = false;
-  bool filtered = false;
-  uint8_t tileset = 0;
   const uint8_t * data;
-  int x = 0;
-  int y = 0;
+  bool active = false;
+  uint8_t tileset = 0;
+  uint8_t x = 0;
+  uint8_t y = 0;
   uint8_t width = 0;
   uint8_t height = 0;
-  uint8_t cols = 0;
-  uint8_t rows = 0;
-  SpriteDisplay * display;
+  char cols = 0;
+  char rows = 0;
   
-  int lastX = 0;
-  int lastY = 0;
+  uint8_t lastX = 0;
+  uint8_t lastY = 0;
   uint8_t lastWidth = 0;
   uint8_t lastHeight = 0;
   
@@ -34,18 +33,24 @@ struct Sprite {
   bool needsUpdate = false;
 };
 
+struct Bog {
+  char x = 0;
+};
+
 class SpriteDisplay {
 public:
-  const uint8_t * tileset;
+  
   Sprite sprites[MAX_SPRITES];
   uint32_t dirtyCells[8];
   
+  const uint8_t * tileset;
+  
   SpriteDisplay() {
-    Sprite * sprite;
-    for (uint8_t k = 0; k < MAX_SPRITES; k++) {
-      sprite = &sprites[k];
-      sprite->display = this;
-    }
+    // Sprite * sprite;
+    // for (uint8_t k = 0; k < MAX_SPRITES; k++) {
+    //   sprite = &sprites[k];
+    //   sprite->display = this;
+    // }
   }
   
   Sprite * addSprite (const uint8_t * spriteData) {
@@ -57,6 +62,8 @@ public:
         sprite->needsUpdate = true;
         sprite->active = true;
         sprite->data = spriteData;
+        sprite->x = 0;
+        sprite->y = 0;
         sprite->cols = pgm_read_byte(&spriteData[1]);
         sprite->rows = pgm_read_byte(&spriteData[2]);
         sprite->width = sprite->cols * 8;
@@ -100,7 +107,7 @@ public:
   void setDirtyRect(int16_t x, int16_t y, int16_t w, int16_t h) {
     // if (x)
     uint8_t endRow = y / 8 + h / 8 + 1;
-    uint8_t endCol = x / 4 + w / 4 + 1;
+    uint8_t endCol = x / 4 + w / 4 + (x / 4 * 4 == x ? 0 : 1);
     for (uint8_t row = y / 8; row < endRow; row++) {
       for (uint32_t col = x / 4; col < endCol; col++) {
         dirtyCells[row] = dirtyCells[row] | ((uint32_t)1 << col);
@@ -284,7 +291,49 @@ public:
     }
   }
   
-  void clear () {
+  void removeAllSprites () {
+    Sprite * sprite;
+    for (uint8_t k = 0; k < MAX_SPRITES; k++) {
+      sprite = &sprites[k];
+      sprite->active = false;
+      sprite->needsUpdate = false;
+    }
+    setDirtyRect(0, 0, 128, 64);
+  }
+  
+  void wipe () {
+    ssd1306_fillscreen(0x00);
+  }
+  
+  void writeText(uint8_t x, uint8_t y, const char * str) {
+  	uint8_t chr = 0;
+    uint8_t byte = 0;
+    uint8_t index = 0;
+    uint8_t fontIndex = 0;
+  	y = y / 8;
+  	while (true) {
+  		chr = pgm_read_byte_near(str + index);
+      if (chr == '\0') break;
+  		if (x > 126) {
+  			x = 0;
+  			y++;
+  		}
+      if (chr >= 65 && chr <= 91) {
+        fontIndex = chr - 55;
+      } else if (chr >= 97 && chr <= 122) {
+        fontIndex = chr - 61;
+      } else if (chr >= 48 && chr <= 57) {
+        fontIndex = chr - 49;
+      }
+  		ssd1306_setpos(x, y);
+  		ssd1306_send_data_start();
+  		for (byte = 0; byte < 6; byte ++) {
+  			ssd1306_send_byte(pgm_read_byte(&ssd1306xled_font6x8[fontIndex * 6 + byte]));
+  		}
+  		ssd1306_send_data_stop();
+  		x += 6;
+  		index++;
+  	}
   }
 };
 

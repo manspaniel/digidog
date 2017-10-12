@@ -1,31 +1,43 @@
 #include <Arduino.h>
 #include "DigiDog.h"
+#include "io.h"
 
-#define callOnIfScene(SCENE_ID, LOCAL_NAME, FUNC)     if (currentScene == SCENE_ID) { LOCAL_NAME.FUNC(&display); }
+extern SpriteDisplay mainDisplay;
+
+#define callOnIfScene(SCENE_ID, LOCAL_NAME, FUNC)     if (currentScene == SCENE_ID) { LOCAL_NAME.FUNC(); }
 
 DigiDog::DigiDog() {
-  display.tileset = TILESET;
-  // display.addSprite(scene_room);
   
-  // display.update();
-  // currentScene = HomeScene;
 }
 
-void DigiDog::goToScene(SceneID scene) {
+void DigiDog::goToScene(char scene) {
   currentScene = scene;
-  // callOnIfScene(HOME_SCENE, homeScene, reset)
-  // callOnIfScene(MENU_SCENE, menuScene, reset)
-  // if (currentScene == HOME_SCENE) { homeScene.reset(&display); }
-  homeScene.reset(&display);
+  
+  // Clear the screen of all sprites, and set the whole screen as "dirty" (to be re-rendered)
+  mainDisplay.removeAllSprites();
+  
+  mainDisplay.wipe();
+  delay(300);
+  
+  // Call reset on the new scene
+  callOnIfScene(HOME_SCENE, homeScene, reset)
+  callOnIfScene(MENU_SCENE, menuScene, reset)
 }
 
 void DigiDog::start() {
+  haveStarted = true;
   goToScene(HOME_SCENE);
 }
 
+bool flipped = false;
+
 void DigiDog::loop() {
-  homeScene.loop(&display);
-  // callOnIfScene(HOME_SCENE, homeScene, loop)
-  // callOnIfScene(MENU_SCENE, menuScene, loop)
-  display.update();
+  
+  // Update the button state for this frame
+  updateButtonState();
+  
+  // Call loop on the current scene
+  callOnIfScene(HOME_SCENE, homeScene, loop);
+  callOnIfScene(MENU_SCENE, menuScene, loop);
+  mainDisplay.update();
 }

@@ -5,8 +5,6 @@
 #include <avr/pgmspace.h>
 
 #include "ssd1306xled.h"
-#include "font6x8.h"
-#include "font8X16.h"
 
 #define SPRITE_HEADER_SIZE 3
 
@@ -139,79 +137,60 @@ void ssd1306_fillscreen(uint8_t fill_Data)
 	}
 }
 
-void ssd1306_char_f6x8(uint8_t x, uint8_t y, const char ch[])
-{
-	uint8_t c,i,j=0;
-	while(ch[j] != '\0')
-	{
-		c = ch[j] - 32;
-		if(x>126)
-		{
-			x=0;
-			y++;
-		}
-		ssd1306_setpos(x,y);
-		ssd1306_send_data_start();
-		for(i=0;i<6;i++)
-		{
-			ssd1306_send_byte(pgm_read_byte(&ssd1306xled_font6x8[c*6+i]));
-		}
-		ssd1306_send_data_stop();
-		x += 6;
-		j++;
-	}
-}
-
-void ssd1306_char_f8x16(uint8_t x, uint8_t y, const char ch[]) {
-	uint8_t c=0,i=0,j=0;
-	while (ch[j]!='\0')
-	{
-		c = ch[j] - 32;
-		if (x>120)
-		{
-			x=0;
-			y++;
-		}
-		ssd1306_setpos(x,y);
-		ssd1306_send_data_start();
-		for(i=0;i<8;i++)
-		{
-			ssd1306_send_byte(pgm_read_byte(&ssd1306xled_font8X16[c*16+i]));
-		}
-		ssd1306_send_data_stop();
-		ssd1306_setpos(x,y+1);
-		ssd1306_send_data_start();
-		for(i=0;i<8;i++)
-		{
-			ssd1306_send_byte(pgm_read_byte(&ssd1306xled_font8X16[c*16+i+8]));
-		}
-		ssd1306_send_data_stop();
-		x+=8;
-		j++;
-	}
-}
-
-void ssd1306_char_f16x16(uint8_t x, uint8_t y, uint8_t N)
-{
-	uint8_t wm=0;
-	unsigned int adder = 32 * N;
-	ssd1306_setpos(x , y);
-	ssd1306_send_data_start();
-	for(wm = 0; wm < 16; wm++)
-	{
-		//ssd1306_send_byte(pgm_read_byte(&ssd1306xled_font8X16cn[adder]));
-		adder += 1;
-	}
-	ssd1306_send_data_stop();
-	ssd1306_setpos(x,y + 1);
-	ssd1306_send_data_start();
-	for(wm = 0;wm < 16;wm++)
-	{
-		//ssd1306_send_byte(pgm_read_byte(&ssd1306xled_font8X16cn[adder]));
-		adder += 1;
-	}
-	ssd1306_send_data_stop();
-}
+// void ssd1306_char_f6x8(uint8_t x, uint8_t y, const char * str) {
+//
+// }
+//
+// void ssd1306_char_f8x16(uint8_t x, uint8_t y, const char ch[]) {
+// 	uint8_t c=0,i=0,j=0;
+// 	while (ch[j]!='\0')
+// 	{
+// 		c = ch[j] - 32;
+// 		if (x>120)
+// 		{
+// 			x=0;
+// 			y++;
+// 		}
+// 		ssd1306_setpos(x,y);
+// 		ssd1306_send_data_start();
+// 		for(i=0;i<8;i++)
+// 		{
+// 			ssd1306_send_byte(pgm_read_byte(&ssd1306xled_font8X16[c*16+i]));
+// 		}
+// 		ssd1306_send_data_stop();
+// 		ssd1306_setpos(x,y+1);
+// 		ssd1306_send_data_start();
+// 		for(i=0;i<8;i++)
+// 		{
+// 			ssd1306_send_byte(pgm_read_byte(&ssd1306xled_font8X16[c*16+i+8]));
+// 		}
+// 		ssd1306_send_data_stop();
+// 		x+=8;
+// 		j++;
+// 	}
+// }
+//
+// void ssd1306_char_f16x16(uint8_t x, uint8_t y, uint8_t N)
+// {
+// 	uint8_t wm=0;
+// 	unsigned int adder = 32 * N;
+// 	ssd1306_setpos(x , y);
+// 	ssd1306_send_data_start();
+// 	for(wm = 0; wm < 16; wm++)
+// 	{
+// 		//ssd1306_send_byte(pgm_read_byte(&ssd1306xled_font8X16cn[adder]));
+// 		adder += 1;
+// 	}
+// 	ssd1306_send_data_stop();
+// 	ssd1306_setpos(x,y + 1);
+// 	ssd1306_send_data_start();
+// 	for(wm = 0;wm < 16;wm++)
+// 	{
+// 		//ssd1306_send_byte(pgm_read_byte(&ssd1306xled_font8X16cn[adder]));
+// 		adder += 1;
+// 	}
+// 	ssd1306_send_data_stop();
+// }
 
 // void ssd1306_draw_bmp(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t bitmap[]) {
 // 	ssd1306_draw_bmp(x0, y0, x1, y1, bitmap, false);
@@ -244,60 +223,3 @@ void ssd1306_fill_range(uint8_t x1, uint8_t x2, uint8_t fill_data) {
 		ssd1306_send_data_stop();
 	}
 }
-
-// uint8_t scaleByte (uint8_t byte, bool secondHalf) {
-// 	// return byte;
-// 	if (secondHalf) byte = byte >> 4;
-// 	uint8_t out = 0;
-// 	for (uint8_t i = 0; i < 8; i++) {
-// 		if ((byte >> (uint8_t)floor(i / 2)) & 1) {
-// 			out = out | (1 << i);
-// 		}
-// 	}
-// 	return out;
-// }
-
-// uint8_t getTileByte(uint8_t x, uint8_t tileRef, uint8_t tileset, bool flipTileX) {
-// 	bool flipX = (tileRef & 0x80) == 0x80;
-// 	bool flipY = (tileRef & 0x80) == 0x80;
-// 	if (flipTileX) {
-// 		flipX = !flipX;
-// 	}
-//
-// 	uint8_t tileIndex = tileset * 64 + (tileRef & 0x3f);
-// 	return pgm_read_byte(&TILESET[tileIndex * 8 + (flipX ? 7 - x : x)]);
-// }
-
-// void drawSprite(uint8_t x1, uint8_t y1, uint8_t sprite[]) {
-// 	drawSprite(x1, y1, sprite, NO_EFFECT);
-// }
-//
-// uint8_t getSpriteWidth(uint8_t sprite[]) {
-// 	return pgm_read_byte(&sprite[2]) * 8;
-// }
-//
-// uint8_t getSpriteHeight(uint8_t sprite[]) {
-// 	return pgm_read_byte(&sprite[1]) * 8;
-// }
-
-// void drawSprite(uint8_t x1, uint8_t y1, uint8_t sprite[], SpriteEffect effect) {
-//
-// 	uint8_t tileset = pgm_read_byte(&sprite[0]);
-// 	uint8_t rows = pgm_read_byte(&sprite[1]);
-// 	uint8_t cols = pgm_read_byte(&sprite[2]);
-//
-// 	uint16_t offset = y1 % 8;
-// 	for (uint8_t y = 0; y <= rows; y++) {
-// 		ssd1306_setpos(x1, y1 / 8 + y);
-// 		ssd1306_send_data_start();
-// 		for (uint8_t x = 0; x < cols; x++) {
-// 			for (uint8_t k = 0; k < 8; k++) {
-// 				uint8_t fore = y == 0 ? 0 : getTileByte(k, pgm_read_byte(&sprite[(y - 1) * cols + (effect & FLIP_X ? cols - x - 1 : x) + SPRITE_HEADER_SIZE]), tileset, effect & FLIP_X);
-// 				uint8_t cur = y == rows ? 0 : getTileByte(k, pgm_read_byte(&sprite[y * cols + (effect & FLIP_X ? cols - x - 1 : x) + SPRITE_HEADER_SIZE]), tileset, effect & FLIP_X);
-// 				ssd1306_send_byte((fore >> (8 - offset)) | (cur << offset));
-// 			}
-// 		}
-// 		ssd1306_send_data_stop();
-// 	}
-//
-// }

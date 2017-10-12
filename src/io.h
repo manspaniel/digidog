@@ -10,8 +10,8 @@ enum ButtonID {
 };
 
 void updateButtonState ();
-bool wasButtonDown (ButtonID);
-bool wasButtonUp (ButtonID);
-bool wasButtonHeld (ButtonID);
+bool buttonWasDown (ButtonID);
+bool buttonWasUp (ButtonID);
+bool buttonWasHeld (ButtonID);
 
 #endif

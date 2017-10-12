@@ -3,13 +3,29 @@
 
 #include "SpriteDisplay.h"
 
+enum MenuName {
+  MENU_MAIN,
+  MENU_TAKE,
+  MENU_CLEAN,
+  MENU_FEED
+};
+
 struct MenuScene {
-  void reset (SpriteDisplay * display) {
-    display->addSprite(ui_menu_frame);
-  };
-  void loop (SpriteDisplay * display) {
-    
-  };
+  Sprite * bgSprite;
+  Sprite * arrowSprite;
+  
+  char totalItems = 0;
+  char menuIndex = 0;
+  char currentMenu = MENU_MAIN;
+  
+  void reset ();
+  void loop ();
+  
+  void setMenu (MenuName menu);
+  void selectedItem (MenuName menu, char index);
+  
+  void drawMenu (const char * items[]);
+  void redraw ();
 };
 
 #endif

@@ -3,14 +3,15 @@
 
 #define SSD1306_SA    0x78  // Slave address
 
-#include <stdlib.h>
-#include <avr/io.h>
-#include <util/delay.h>
-#include <avr/pgmspace.h>
-#include <avr/sleep.h>
+// #include <stdlib.h>
+// #include <avr/io.h>
+// #include <util/delay.h>
+// #include <avr/pgmspace.h>
+// #include <avr/sleep.h>
 
 #include "ssd1306xled.h"
 #include "DigiDog.h"
+#include "SpriteDisplay.h"
 
 // void * operator new(size_t size) {
 //   return malloc(size);
@@ -20,42 +21,22 @@
 //   free(ptr);
 // }
 
-DigiDog doggy;
+// #define CALIBRATON_MODE true
 
-volatile int watchdog_counter;
-
-//This runs each time the watch dog wakes us up from sleep
-ISR(WDT_vect) {
-  watchdog_counter++;
-}
-
-// 0=16ms, 1=32ms, 2=64ms, 3=128ms, 4=250ms, 5=500ms
-// 6=1sec, 7=2sec, 8=4sec, 9=8sec
-// From: http://interface.khm.de/index.php/lab/experiments/sleep_watchdog_battery/
-void setup_watchdog(int timerPrescaler) {
-
-  if (timerPrescaler > 9 ) timerPrescaler = 9; //Correct incoming amount if need be
-
-  byte bb = timerPrescaler & 7;
-  if (timerPrescaler > 7) bb |= (1<<5); //Set the special 5th bit if necessary
-
-  //This order of commands is important and cannot be combined
-  MCUSR &= ~(1<<WDRF); //Clear the watch dog reset
-  WDTCR |= (1<<WDCE) | (1<<WDE); //Set WD_change enable, set WD enable
-  WDTCR = bb; //Set new watchdog timeout value
-  WDTCR |= _BV(WDIE); //Set the interrupt enable, this will keep unit from resetting after each int
-}
+#ifndef CALIBRATON_MODE
+  SpriteDisplay mainDisplay;
+  DigiDog doggy;
+#endif
 
 void setup() {
   // Small delay is necessary if ssd1306_initis the first operation in the application.
   // _delay_ms(40);
   ssd1306_init();
  
-  ssd1306_fillscreen(0x00);
+  ssd1306_fillscreen(0x0);
   // ssd1306_char_f8x16(1, 2, "VDOG");
-  _delay_ms(1000);
+  delay(100);
  
-  watchdog_counter = 0;
   // set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   // setup_watchdog(6);
  
@@ -67,28 +48,30 @@ void setup() {
   //   _delay_ms(200);
   // }
   
-  pinMode(A2, INPUT);
+  // pinMode(A2, INPUT);
   
-  doggy.start();
+  #ifndef CALIBRATON_MODE
+    doggy.start();
+  #endif
   
 }
 
 void loop() {
   
-  // sleep_mode();
-  
   // Figure out the current button
   
+  #ifdef CALIBRATON_MODE
+    int signal = analogRead(A2);
+    
+    ssd1306_fill_range(0, 60, 0x00);
+    char buffer[10];         //the ASCII of the integer will be stored in this char array
+    itoa(signal, buffer, 10);
+    ssd1306_char_f6x8(0, 0, buffer);
+  #endif
   
-  doggy.loop();
-  
-  
-  // int signal = analogRead(A2);
-  
-  // ssd1306_fill_range(0, 60, 0x00);
-  // char buffer[10];         //the ASCII of the integer will be stored in this char array
-  // itoa(signal, buffer, 10);
-  // ssd1306_char_f8x16(0, 0, buffer);
+  #ifndef CALIBRATON_MODE
+    doggy.loop();
+  #endif
   
   // delay(100);
   
