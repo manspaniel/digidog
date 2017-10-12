@@ -14,6 +14,10 @@ struct MenuScene {
   Sprite * bgSprite;
   Sprite * arrowSprite;
   
+  bool arrowFlip = false;
+  bool fastArrow = false;
+  char ticksTillAlt = 0;
+  
   char totalItems = 0;
   char menuIndex = 0;
   char currentMenu = MENU_MAIN;

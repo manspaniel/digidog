@@ -18,7 +18,7 @@ extern DigiDog doggy;
 void MenuScene::reset () {
   arrowSprite = mainDisplay.addSprite(ui_selection_arrow);
   arrowSprite->x = 8;
-  arrowSprite->y = 8;
+  arrowSprite->y = 0;
   bgSprite = mainDisplay.addSprite(ui_menu_frame);
   setMenu(MENU_MAIN);
 };
@@ -32,12 +32,42 @@ void MenuScene::loop () {
   if (buttonWasDown(MENU_BUTTON)) {
     menuIndex++;
     if (menuIndex > totalItems) {
+      fastArrow = true;
       menuIndex = 0;
     }
+  } else if (buttonWasHeld(OK_BUTTON)) {
+    mainDisplay.wipe();
   }
   
   // Move the arrow sprite
-  arrowSprite->y = 8 + menuIndex * 8;
+  char arrowTarget = 8 + menuIndex * 8;
+  if (arrowSprite->y == 0) {
+    arrowFlip = false;
+    ticksTillAlt = 0;
+    arrowSprite->y = arrowTarget;
+    arrowSprite->x = 8;
+  } else if (arrowTarget < arrowSprite->y) {
+    delay(fastArrow ? 2 : 15);
+    arrowFlip = false;
+    ticksTillAlt = 0;
+    arrowSprite->y--;
+    arrowSprite->x = 8;
+  } else if (arrowTarget > arrowSprite->y) {
+    delay(fastArrow ? 2 : 15);
+    arrowFlip = false;
+    ticksTillAlt = 0;
+    arrowSprite->y++;
+    arrowSprite->x = 8;
+  } else {
+    fastArrow = false;
+    if (ticksTillAlt == 0) {
+      arrowFlip = !arrowFlip;
+      ticksTillAlt = 200;
+    } else {
+      ticksTillAlt--;
+    }
+  }
+  arrowSprite->data = arrowFlip ? ui_selection_arrow : ui_selection_arrow_alt;
   arrowSprite->needsUpdate = true;
 };
 

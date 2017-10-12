@@ -25,7 +25,10 @@ void HomeScene::loop () {
     doggy.goToScene(MENU_SCENE);
     return;
     // goToScene
+  } else if (buttonWasHeld(OK_BUTTON)) {
+    mainDisplay.wipe();
   }
+  
   //
   if (x < 0) {
     xDir = 1;
