@@ -25,11 +25,11 @@ Sprite * SpriteDisplay::addSprite (const uint8_t * spriteData) {
       sprite->data = spriteData;
       sprite->x = 0;
       sprite->y = 0;
-      sprite->cols = pgm_read_byte(&spriteData[1]);
-      sprite->rows = pgm_read_byte(&spriteData[2]);
+      sprite->cols = pgm_read_byte_near(&spriteData[1]);
+      sprite->rows = pgm_read_byte_near(&spriteData[2]);
       sprite->width = sprite->cols * 8;
       sprite->height = sprite->rows * 8;
-      sprite->tileset = pgm_read_byte(&spriteData[0]);
+      sprite->tileset = pgm_read_byte_near(&spriteData[0]);
       return &sprites[k];
     }
   }
@@ -43,7 +43,7 @@ bool SpriteDisplay::rectsOverlap (int x1, int y1, int w1, int h1, int x2, int y2
 uint8_t SpriteDisplay::getTileByte(Sprite * sprite, uint8_t x, uint8_t y, uint8_t shiftX, bool alpha) {
   
   // Grab the type reference byte, which contains flipX/flipY/ID
-  uint8_t tileRef = pgm_read_byte(&sprite->data[SPRITE_HEADER_SIZE + y * sprite->cols + x]);
+  uint8_t tileRef = pgm_read_byte_near(&sprite->data[SPRITE_HEADER_SIZE + y * sprite->cols + x]);
   
   // We flip?
   bool flipX = (tileRef & 0x80) == 0x80;
@@ -53,7 +53,7 @@ uint8_t SpriteDisplay::getTileByte(Sprite * sprite, uint8_t x, uint8_t y, uint8_
   uint16_t tileIndex = sprite->tileset * 64 + (tileRef & 0x3f);
   
   // Read and return the cell byte, compensaiting for x offset
-  uint8_t value = pgm_read_byte(&TILESET[tileIndex * 2 * 8 + (flipX ? 7 - shiftX : shiftX) * 2 + (alpha ? 1 : 0)]);
+  uint8_t value = pgm_read_byte_near(&TILESET[tileIndex * 2 * 8 + (flipX ? 7 - shiftX : shiftX) * 2 + (alpha ? 1 : 0)]);
   
   if (flipY) {
     value = (value & 0xF0) >> 4 | (value & 0x0F) << 4;
@@ -66,7 +66,6 @@ uint8_t SpriteDisplay::getTileByte(Sprite * sprite, uint8_t x, uint8_t y, uint8_
 }
 
 void SpriteDisplay::setDirtyRect (uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
-  // if (x)
   uint8_t endRow = y / 8 + h / 8 + 1;
   uint8_t endCol = x / 4 + w / 4 + (x / 4 * 4 == x ? 0 : 1);
   for (uint8_t row = y / 8; row < endRow; row++) {
@@ -289,7 +288,7 @@ void SpriteDisplay::writeText(uint8_t x, uint8_t y, const char * str) {
 		ssd1306_setpos(x, y);
 		ssd1306_send_data_start();
 		for (byte = 0; byte < 6; byte ++) {
-			ssd1306_send_byte(pgm_read_byte(&ssd1306xled_font6x8[fontIndex * 6 + byte]));
+			ssd1306_send_byte(pgm_read_byte_near(&ssd1306xled_font6x8[fontIndex * 6 + byte]));
 		}
 		ssd1306_send_data_stop();
 		x += 6;
